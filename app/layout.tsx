@@ -30,7 +30,6 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} ${montserrat.variable} antialiased font-poppins`}
       >
-        <Navbar />
         {children}
       </body>
     </html>

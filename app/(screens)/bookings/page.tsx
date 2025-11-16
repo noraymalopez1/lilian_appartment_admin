@@ -1,3 +1,4 @@
+"use client";
 import { ChevronRight, CirclePlus, Funnel } from "lucide-react";
 import React, { useState } from "react";
 
