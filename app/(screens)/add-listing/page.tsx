@@ -3,7 +3,7 @@ import React from "react";
 
 const AddListing = () => {
   return (
-    <div className="w-3xl mx-auto pt-12">
+    <div className="w-full px-2 md:w-3xl md:mx-auto pt-12">
       {/* Header */}
       <div>
         <h2 className="text-3xl font-bold">Add Listing</h2>
@@ -12,7 +12,7 @@ const AddListing = () => {
           <ChevronRight size={16} />
         </p>
       </div>
-      <div className="rounded-2xl border border-gray-200 bg-white py-4 px-20 mt-4">
+      <div className="rounded-2xl border border-gray-200 bg-white py-4 px-2 md:px-20 mt-4">
         <h2 className="text-center text-3xl font-bold pt-4">
           Basic Information
         </h2>
@@ -56,7 +56,7 @@ const AddListing = () => {
       </div>
 
       {/* price */}
-      <div className="rounded-2xl border border-gray-200 bg-white py-4 px-20 mt-4">
+      <div className="rounded-2xl border border-gray-200 bg-white py-4 px-2 md:px-20 mt-4">
         <h2 className="text-center text-3xl font-bold pt-4">Price</h2>
         {/* Form Container */}
         <div className="space-y-6 mt-4">
@@ -524,7 +524,7 @@ const AddListing = () => {
             Features
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-10 gap-y-4">
+          <div className="grid grid-cols-3 md:grid-cols-3 gap-x-10 gap-y-4">
             {[
               ["Pool", "Hot Tub", "Gym", "Bar"],
               [
@@ -542,7 +542,10 @@ const AddListing = () => {
             ].map((column, colIndex) => (
               <div key={colIndex} className="space-y-3">
                 {column.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-center">
+                  <div
+                    key={featureIndex}
+                    className="flex items-start md:items-center"
+                  >
                     <input
                       id={`feature-${colIndex}-${featureIndex}`}
                       name={`feature-${colIndex}-${featureIndex}`}

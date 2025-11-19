@@ -158,7 +158,7 @@ const Booking = () => {
     nights: "5",
   };
   return (
-    <div className="w-4xl mx-auto pt-6">
+    <div className="w-full md:w-4xl mx-auto pt-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
