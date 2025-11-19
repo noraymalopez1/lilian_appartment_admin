@@ -42,7 +42,7 @@ const AttractionList = () => {
   };
 
   return (
-    <div className="w-4xl mx-auto pt-12">
+    <div className="w-full md:w-4xl md:mx-auto pt-12">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -67,9 +67,9 @@ const AttractionList = () => {
 
       {/* main cards */}
       <div className="mx-auto my-8 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-        <div className="flex">
+        <div className="flex flex-col md:flex-row">
           {/* --- Left Section: Image and Slider Dots --- */}
-          <div className="w-1/3 relative flex-shrink-0">
+          <div className="w-full md:w-1/3 relative flex-shrink-0">
             {/* Placeholder for the image of boats on water */}
             <div
               className="h-full bg-cover bg-center"

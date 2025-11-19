@@ -44,7 +44,7 @@ const ApartmentListing = () => {
   };
 
   return (
-    <div className="w-4xl mx-auto pt-12">
+    <div className="w-full md:w-4xl mx-auto pt-12">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
