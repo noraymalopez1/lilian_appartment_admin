@@ -23,7 +23,7 @@ const Navbar = () => {
         <div className="flex flex-row-reverse md:flex-row gap-1 items-center md:gap-3">
           {/* <BellIcon size={24} className="mr-8" /> */}
           <Image
-            src="/avatar.png"
+            src="./black-logo.svg"
             alt="Avatar"
             height={50}
             width={50}
