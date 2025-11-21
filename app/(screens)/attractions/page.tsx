@@ -42,7 +42,7 @@ const AttractionList = () => {
   };
 
   return (
-    <div className="w-full md:w-4xl md:mx-auto pt-12">
+    <div className="w-full max-w-4xl mx-auto pt-12 px-4 md:px-0">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -69,7 +69,7 @@ const AttractionList = () => {
       <div className="mx-auto my-8 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
         <div className="flex flex-col md:flex-row">
           {/* --- Left Section: Image and Slider Dots --- */}
-          <div className="w-full md:w-1/3 relative flex-shrink-0">
+          <div className="w-full md:w-1/3 relative flex-shrink-0 h-48 md:h-auto">
             {/* Placeholder for the image of boats on water */}
             <div
               className="h-full bg-cover bg-center"
@@ -87,16 +87,15 @@ const AttractionList = () => {
               {[...Array(5)].map((_, i) => (
                 <div
                   key={i}
-                  className={`w-2 h-2 rounded-full cursor-pointer ${
-                    i === 0 ? "bg-white" : "bg-gray-400 opacity-70"
-                  }`}
+                  className={`w-2 h-2 rounded-full cursor-pointer ${i === 0 ? "bg-white" : "bg-gray-400 opacity-70"
+                    }`}
                 ></div>
               ))}
             </div>
           </div>
 
           {/* --- Right Section: Content and Details --- */}
-          <div className="w-2/3 p-10 flex flex-col justify-between relative">
+          <div className="w-full md:w-2/3 p-6 md:p-10 flex flex-col justify-between relative">
             <div className="flex justify-between items-start mb-2">
               {/* Title and Location */}
               <div>
@@ -207,11 +206,10 @@ const AttractionList = () => {
                 key={page}
                 className={`
                                 ${pageNumButtonClass} 
-                                ${
-                                  page === currentPage
-                                    ? "bg-green-100 text-green-700 border-green-500 ring-2 ring-green-500 ring-opacity-50"
-                                    : "text-gray-700 hover:bg-gray-50 border-gray-300"
-                                }
+                                ${page === currentPage
+                    ? "bg-green-100 text-green-700 border-green-500 ring-2 ring-green-500 ring-opacity-50"
+                    : "text-gray-700 hover:bg-gray-50 border-gray-300"
+                  }
                             `}
               >
                 {page}

@@ -3,7 +3,7 @@ import React from "react";
 
 const AddListing = () => {
   return (
-    <div className="w-full px-2 md:w-3xl md:mx-auto pt-12">
+    <div className="w-full max-w-3xl mx-auto pt-12 px-4 md:px-0">
       {/* Header */}
       <div>
         <h2 className="text-3xl font-bold">Add Listing</h2>
@@ -12,7 +12,7 @@ const AddListing = () => {
           <ChevronRight size={16} />
         </p>
       </div>
-      <div className="rounded-2xl border border-gray-200 bg-white py-4 px-2 md:px-20 mt-4">
+      <div className="rounded-2xl border border-gray-200 bg-white py-4 px-4 md:px-20 mt-4">
         <h2 className="text-center text-3xl font-bold pt-4">
           Basic Information
         </h2>
@@ -56,13 +56,13 @@ const AddListing = () => {
       </div>
 
       {/* price */}
-      <div className="rounded-2xl border border-gray-200 bg-white py-4 px-2 md:px-20 mt-4">
+      <div className="rounded-2xl border border-gray-200 bg-white py-4 px-4 md:px-20 mt-4">
         <h2 className="text-center text-3xl font-bold pt-4">Price</h2>
         {/* Form Container */}
         <div className="space-y-6 mt-4">
           {/* First Row: Price and No of Days */}
-          <div className="flex items-center space-x-4">
-            <div className="grid grid-cols-2 gap-4 flex-grow">
+          <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow w-full">
               {/* Price Field 1 */}
               <div>
                 <label
@@ -136,8 +136,8 @@ const AddListing = () => {
           </div>
 
           {/* Second Row: Price and Type of Person */}
-          <div className="flex items-center space-x-4">
-            <div className="grid grid-cols-2 gap-4 flex-grow">
+          <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow w-full">
               {/* Price Field 2 */}
               <div>
                 <label
@@ -354,7 +354,7 @@ const AddListing = () => {
               Photos or images
             </label>
 
-            <div className="w-full p-16 border border-gray-300 rounded-lg bg-gray-50 flex flex-col items-center justify-center text-center space-y-4 shadow-inner min-h-[300px]">
+            <div className="w-full p-8 md:p-16 border border-gray-300 rounded-lg bg-gray-50 flex flex-col items-center justify-center text-center space-y-4 shadow-inner min-h-[200px] md:min-h-[300px]">
               <p className="text-gray-600 text-lg">Drag and Drop images</p>
               <button
                 type="button"
@@ -524,7 +524,7 @@ const AddListing = () => {
             Features
           </h2>
 
-          <div className="grid grid-cols-3 md:grid-cols-3 gap-x-10 gap-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-10 gap-y-4">
             {[
               ["Pool", "Hot Tub", "Gym", "Bar"],
               [

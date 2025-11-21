@@ -191,13 +191,18 @@ const page = () => {
     parseDate(value) || undefined
   );
   const [month, setMonth] = React.useState<Date | undefined>(date);
-  const chartRef = useRef(null);
-  const chartInstance = useRef(null);
+  const chartRef = useRef<HTMLCanvasElement | null>(null);
+  const chartInstance = useRef<Chart | null>(null);
 
   useEffect(() => {
-    if (chartInstance.current) chartInstance?.current?.destroy();
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+    }
+
+    if (!chartRef.current) return;
 
     const ctx = chartRef.current.getContext("2d");
+    if (!ctx) return;
 
     chartInstance.current = new Chart(ctx, {
       type: "line",
@@ -239,7 +244,8 @@ const page = () => {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (ctx) => `$${ctx.parsed.y.toLocaleString()}`,
+              label: (ctx) =>
+                ctx.parsed.y !== null ? `$${ctx.parsed.y.toLocaleString()}` : "",
             },
             backgroundColor: "white",
             bodyColor: "black",
@@ -251,7 +257,12 @@ const page = () => {
           y: {
             beginAtZero: false,
             ticks: {
-              callback: (v) => `${v / 1000}k`,
+              callback: (v) => {
+                if (typeof v === "number") {
+                  return `${v / 1000}k`;
+                }
+                return v;
+              },
               color: "#6b7280",
             },
             grid: { color: "#f3f4f6" },
@@ -265,7 +276,7 @@ const page = () => {
     });
   }, []);
   return (
-    <div className="w-full px-2 md:px-8 md:mx-auto pt-12">
+    <div className="w-full px-2 md:px-0 pt-4 md:pt-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -385,7 +396,7 @@ const page = () => {
         </div>
       </div>
       {/* stats */}
-      <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
           {
             title: "Total Bookings",
@@ -405,39 +416,41 @@ const page = () => {
         ].map((stat, index) => (
           <div
             key={index}
-            className="flex items-center gap-2 bg-white p-4 rounded-xl w-full"
+            className="flex items-center gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100"
           >
-            <div className="flex items-center justify-center gap-2 bg-[#FFF6ED] p-2 rounded-md">
-              <div className="flex items-center justify-center text-[#99582A] gap-2">
+            <div className="flex items-center justify-center bg-[#FFF6ED] p-3 rounded-lg">
+              <div className="text-[#99582A]">
                 {stat.icon}
               </div>
             </div>
             <div>
-              <p className="">{stat.title}</p>
-              <h2 className="text-2xl font-bold">{stat.value}</h2>
+              <p className="text-sm text-gray-500">{stat.title}</p>
+              <h2 className="text-2xl font-bold text-gray-900">{stat.value}</h2>
             </div>
           </div>
         ))}
       </div>
 
       {/* Chart and sidebar Section */}
-      <div className="flex w-full mt-8 gap-4">
+      <div className="flex flex-col lg:flex-row w-full mt-8 gap-6">
         {/* Card One (70%) */}
-        <div className="w-7/10">
-          <div className="bg-white rounded-2xl shadow p-6 w-full">
+        <div className="w-full lg:w-[70%]">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 w-full">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Booking Analysis</h2>
-              <select className="border rounded-md px-3 py-1 text-sm">
+              <h2 className="text-xl font-semibold text-gray-900">Booking Analysis</h2>
+              <select className="border rounded-md px-3 py-1 text-sm bg-transparent outline-none focus:ring-2 focus:ring-orange-500/20">
                 <option>Yearly</option>
                 <option>Monthly</option>
               </select>
             </div>
-            <canvas ref={chartRef} height="120"></canvas>
+            <div className="relative h-[300px] w-full">
+              <canvas ref={chartRef}></canvas>
+            </div>
           </div>
         </div>
         {/* Card Two (30%) */}
-        <div className="w-3/10">
-          <Card className="rounded-xl shadow-md p-0 overflow-hidden">
+        <div className="w-full lg:w-[30%]">
+          <Card className="rounded-xl shadow-sm border border-gray-100 p-0 overflow-hidden h-full">
             {" "}
             {/* Adjusted padding for a tighter look */}
             <CardHeader className="pb-2 px-6 pt-6">
