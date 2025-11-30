@@ -40,7 +40,7 @@ const Reviews = () => {
     "w-10 h-10 flex items-center justify-center border rounded-lg text-sm font-medium transition";
 
   return (
-    <div className="w-full md:w-4xl mx-auto pt-12">
+    <div className="w-full max-w-4xl mx-auto pt-12 px-4 md:px-0">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -60,7 +60,7 @@ const Reviews = () => {
         </div>
       </div>
       <div>
-        <div className="relative mx-auto my-8 py-6 px-12 bg-white rounded-xl shadow-lg border border-gray-100">
+        <div className="relative mx-auto my-8 py-6 px-6 md:px-12 bg-white rounded-xl shadow-lg border border-gray-100">
           {/* Top section: Avatar, user info, stars, date, ellipsis */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center">
@@ -95,11 +95,10 @@ const Reviews = () => {
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-5 h-5 ${
-                      i < reviewData.rating
+                    className={`w-5 h-5 ${i < reviewData.rating
                         ? "text-yellow-400"
                         : "text-gray-300"
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -156,11 +155,10 @@ const Reviews = () => {
                 key={page}
                 className={`
                                       ${pageNumButtonClass} 
-                                      ${
-                                        page === currentPage
-                                          ? "bg-green-100 text-green-700 border-green-500 ring-2 ring-green-500 ring-opacity-50"
-                                          : "text-gray-700 hover:bg-gray-50 border-gray-300"
-                                      }
+                                      ${page === currentPage
+                    ? "bg-green-100 text-green-700 border-green-500 ring-2 ring-green-500 ring-opacity-50"
+                    : "text-gray-700 hover:bg-gray-50 border-gray-300"
+                  }
                                   `}
               >
                 {page}

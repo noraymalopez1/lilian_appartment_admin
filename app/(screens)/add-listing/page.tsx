@@ -277,7 +277,7 @@ const AddListing = () => {
   const personPriceRowsError = errors.priceSection?.personPriceRows?.message;
 
   return (
-    <div className="w-full px-2 md:w-3xl md:mx-auto pt-12">
+    <div className="w-full max-w-3xl mx-auto pt-12 px-4 md:px-0">
       {/* Header */}
       <div>
         <h2 className="text-3xl font-bold">Add Listing</h2>
@@ -288,6 +288,7 @@ const AddListing = () => {
           <ChevronRight size={16} /> Add Listing <ChevronRight size={16} />
         </p>
       </div>
+<<<<<<< HEAD
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-6">
         {/* === 1. BASIC INFORMATION === */}
@@ -303,6 +304,19 @@ const AddListing = () => {
               placeholder="Type a main title for the listing"
               error={errors.basicInfo?.mainTitle?.message}
               {...register("basicInfo.mainTitle")}
+=======
+      <div className="rounded-2xl border border-gray-200 bg-white py-4 px-4 md:px-20 mt-4">
+        <h2 className="text-center text-3xl font-bold pt-4">
+          Basic Information
+        </h2>
+        <form action="" className="mt-4 space-y-6">
+          <div className="flex flex-col gap-1">
+            <label htmlFor="">Listing Title</label>
+            <input
+              type="text"
+              placeholder="type a title"
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none"
+>>>>>>> 88df24dad29c222f2b0a542ba6e2739840d97720
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <SelectField
@@ -346,6 +360,175 @@ const AddListing = () => {
               )}
             </div>
           </div>
+<<<<<<< HEAD
+=======
+          <div className="flex flex-col gap-1">
+            <label htmlFor="">Listing Title</label>
+            <textarea
+              cols={10}
+              rows={5}
+              placeholder="type a title"
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none"
+            />
+          </div>
+        </form>
+      </div>
+
+      {/* price */}
+      <div className="rounded-2xl border border-gray-200 bg-white py-4 px-4 md:px-20 mt-4">
+        <h2 className="text-center text-3xl font-bold pt-4">Price</h2>
+        {/* Form Container */}
+        <div className="space-y-6 mt-4">
+          {/* First Row: Price and No of Days */}
+          <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow w-full">
+              {/* Price Field 1 */}
+              <div>
+                <label
+                  htmlFor="price1"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Price
+                </label>
+                <input
+                  type="text"
+                  id="price1"
+                  placeholder="Enter Price"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              {/* No of Days Field */}
+              <div>
+                <label
+                  htmlFor="days"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  No of Days
+                </label>
+                <div className="relative">
+                  <select
+                    id="days"
+                    defaultValue="Select"
+                    className="w-full appearance-none px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white pr-8"
+                  >
+                    <option disabled>Select</option>
+                    <option>1 Day</option>
+                    <option>2 Days</option>
+                  </select>
+                  {/* Custom Arrow */}
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg
+                      className="h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Plus Button 1 */}
+            <button className="p-1 border border-gray-400 text-gray-600 rounded-full hover:bg-gray-50 focus:outline-none transition duration-150 ease-in-out">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+            </button>
+          </div>
+
+          {/* Second Row: Price and Type of Person */}
+          <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow w-full">
+              {/* Price Field 2 */}
+              <div>
+                <label
+                  htmlFor="price2"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Price
+                </label>
+                <input
+                  type="text"
+                  id="price2"
+                  placeholder="Enter Price"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              {/* Type of Person Field */}
+              <div>
+                <label
+                  htmlFor="personType"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Type of Person
+                </label>
+                <div className="relative">
+                  <select
+                    id="personType"
+                    defaultValue="Select"
+                    className="w-full appearance-none px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white pr-8"
+                  >
+                    <option disabled>Select</option>
+                    <option>Adult</option>
+                    <option>Child</option>
+                  </select>
+                  {/* Custom Arrow */}
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg
+                      className="h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Plus Button 2 */}
+            <button className="p-1 border border-gray-400 text-gray-600 rounded-full hover:bg-gray-50 focus:outline-none transition duration-150 ease-in-out">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+            </button>
+          </div>
+>>>>>>> 88df24dad29c222f2b0a542ba6e2739840d97720
         </div>
 
         {/* --- */}
@@ -565,6 +748,7 @@ const AddListing = () => {
                 Photos or images
               </label>
 
+<<<<<<< HEAD
               <div className="w-full p-16 border border-dashed border-gray-300 rounded-lg bg-gray-50 flex flex-col items-center justify-center text-center space-y-4 shadow-inner min-h-[300px]">
                 <p className="text-gray-600 text-lg">Drag and Drop images</p>
                 <label
@@ -586,6 +770,17 @@ const AddListing = () => {
                 // BUG FIX: The image error will be an object if z.any() is used, display a generic message.
                 <p className="mt-1 text-xs text-red-500">Image upload error</p>
               )}
+=======
+            <div className="w-full p-8 md:p-16 border border-gray-300 rounded-lg bg-gray-50 flex flex-col items-center justify-center text-center space-y-4 shadow-inner min-h-[200px] md:min-h-[300px]">
+              <p className="text-gray-600 text-lg">Drag and Drop images</p>
+              <button
+                type="button"
+                className="px-6 py-3 text-white font-medium rounded-lg shadow-md transition duration-150"
+                style={{ backgroundColor: "#A0522D", borderColor: "#A0522D" }}
+              >
+                Browse images
+              </button>
+>>>>>>> 88df24dad29c222f2b0a542ba6e2739840d97720
             </div>
           </div>
         </div>
@@ -649,6 +844,7 @@ const AddListing = () => {
             Features
           </h2>
 
+<<<<<<< HEAD
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-4">
             {allFeatures.map((feature, index) => (
               <div key={feature} className="flex items-center">
@@ -665,6 +861,44 @@ const AddListing = () => {
                 >
                   {feature}
                 </label>
+=======
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-10 gap-y-4">
+            {[
+              ["Pool", "Hot Tub", "Gym", "Bar"],
+              [
+                "Family Room",
+                "Smoking Allowed",
+                "Breakfast included",
+                "Coffee Maker",
+              ],
+              [
+                "Family Room",
+                "Smoking Allowed",
+                "Breakfast included",
+                "Coffee Maker",
+              ],
+            ].map((column, colIndex) => (
+              <div key={colIndex} className="space-y-3">
+                {column.map((feature, featureIndex) => (
+                  <div
+                    key={featureIndex}
+                    className="flex items-start md:items-center"
+                  >
+                    <input
+                      id={`feature-${colIndex}-${featureIndex}`}
+                      name={`feature-${colIndex}-${featureIndex}`}
+                      type="checkbox"
+                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label
+                      htmlFor={`feature-${colIndex}-${featureIndex}`}
+                      className="ml-3 text-sm font-medium text-gray-700 select-none"
+                    >
+                      {feature}
+                    </label>
+                  </div>
+                ))}
+>>>>>>> 88df24dad29c222f2b0a542ba6e2739840d97720
               </div>
             ))}
           </div>

@@ -14,34 +14,12 @@ const BookingCard = ({ data }: any) => {
     </span>
   );
 
-  // Custom function for the date/time blocks
-  const DateBlock = ({ title, date, month, time }: any) => (
-    <div className="flex flex-col items-center border-l border-gray-200 px-4 py-2 text-center w-full">
-      <p className="text-sm font-light text-gray-500 mb-1">{title}</p>
-      <h3 className="text-4xl font-bold text-gray-800">{date}</h3>
-      <p className="text-lg font-medium text-gray-700">{month}</p>
-      <div className="flex items-center text-sm font-normal text-gray-500 mt-2">
-        <svg
-          className="w-4 h-4 mr-1"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-          ></path>
-        </svg>
-        {time}
-      </div>
-    </div>
-  );
-
   return (
     <div className="relative flex bg-white p-4 rounded-xl shadow-lg border border-gray-100 mb-6">
+
+
+    
+
       {/* 1. Image and Info Column */}
       <div className="flex flex-grow items-start space-x-4 pr-6">
         {/* Image */}
@@ -51,7 +29,7 @@ const BookingCard = ({ data }: any) => {
             {/* Placeholder for the image with palm trees and pool */}
           </div>
         </div>
-
+    
         {/* Text Info */}
         <div className="flex flex-col text-sm">
           <h2 className="text-lg font-semibold text-gray-900 flex items-center mb-1">
@@ -158,7 +136,7 @@ const Booking = () => {
     nights: "5",
   };
   return (
-    <div className="w-full md:w-4xl mx-auto pt-6">
+    <div className="w-full mx-auto pt-6 border border-black">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -181,7 +159,7 @@ const Booking = () => {
         </div>
       </div>
       <div className="mt-4">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl w-full mx-auto">
           {/* First Card */}
           <BookingCard data={sampleData} />
           {/* Second Card (duplicate for matching the image) */}
@@ -191,5 +169,30 @@ const Booking = () => {
     </div>
   );
 };
+
+const DateBlock = ({ title, date, month, time }: any) => (
+  <div className="flex flex-col items-center border-l border-gray-200 px-4 py-2 text-center w-full">
+    <p className="text-sm font-light text-gray-500 mb-1">{title}</p>
+    <h3 className="text-4xl font-bold text-gray-800">{date}</h3>
+    <p className="text-lg font-medium text-gray-700">{month}</p>
+    <div className="flex items-center text-sm font-normal text-gray-500 mt-2">
+      <svg
+        className="w-4 h-4 mr-1"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+        ></path>
+      </svg>
+      {time}
+    </div>
+  </div>
+);
 
 export default Booking;

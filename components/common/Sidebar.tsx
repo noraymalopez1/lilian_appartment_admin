@@ -57,15 +57,21 @@ const Sidebar = () => {
   return (
     <div
       className={cn(
-        "flex h-screen items-center transition-all duration-300",
-        sidebarOpen ? "w-[200px]" : "w-[5%] min-w-[75px]",
-        "fixed md:relative lg:relative left-0 bg-white shadow-2xl"
+        "flex h-screen flex-col items-center transition-all duration-300 z-50 bg-white shadow-2xl border-r border-gray-200",
+        sidebarOpen ? "w-[250px] translate-x-0" : "w-0 -translate-x-full md:translate-x-0 md:w-[5%] md:min-w-[75px]",
+        "fixed top-0 left-0"
       )}
     >
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-[-1] md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
       <div
-        className={`${
-          !sidebarOpen ? "max-w-16" : ""
-        } flex h-full w-full mt-32 min-w-fit gap-3 flex-col items-center justify-between`}
+        className={`${!sidebarOpen ? "max-w-16" : ""
+          } flex h-full w-full mt-32 min-w-fit gap-3 flex-col items-center justify-between`}
       >
         <div className="flex flex-col items-center justify-center">
           <div
@@ -140,20 +146,14 @@ const Sidebar = () => {
         onMouseLeave={() => {
           setTriggerHovered(false);
         }}
-        className="size-10"
+        className={cn(
+          "absolute -right-3 top-20 z-50 flex h-6 w-6 items-center justify-center rounded-full border bg-white shadow-md md:flex hidden",
+          sidebarOpen ? "rotate-0" : "rotate-180"
+        )}
       >
-        {!triggerHovered && (
-          <div className="ml-1 h-8 w-0.5 cursor-pointer rounded-full bg-black" />
-        )}
-        {triggerHovered && sidebarOpen && (
-          <ChevronLeft className="text-black" />
-        )}
-
-        {triggerHovered && !sidebarOpen && (
-          <ChevronRight className="text-hlack" />
-        )}
+        <ChevronLeft className="h-4 w-4" />
       </button>
-    </div>
+    </div >
   );
 };
 
