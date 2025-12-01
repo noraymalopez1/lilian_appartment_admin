@@ -9,46 +9,46 @@ const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
 
 // Review type
 export interface ReviewType {
-  id: string;
-  avatar: string;
-  postedBy: string;
-  apartmentName: string;
-  reviewTitle: string;
-  reviewText: string;
-  rating: number;
-  date: string;
-  created_at?: string;
+	id: string;
+	avatar: string;
+	postedBy: string;
+	apartmentName: string;
+	reviewTitle: string;
+	reviewText: string;
+	rating: number;
+	date: string;
+	created_at?: string;
 }
 
 interface UseReviewsReturn {
-  reviews: ReviewType[];
-  loading: boolean;
-  error: string | null;
-  fetchReviews: () => Promise<void>;
+	reviews: ReviewType[];
+	loading: boolean;
+	error: string | null;
+	fetchReviews: () => Promise<void>;
 }
 
 export const useReviews = (): UseReviewsReturn => {
-  const [reviews, setReviews] = useState<ReviewType[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+	const [reviews, setReviews] = useState<ReviewType[]>([]);
+	const [loading, setLoading] = useState<boolean>(false);
+	const [error, setError] = useState<string | null>(null);
 
-  // Fetch reviews from Supabase
-  const fetchReviews = useCallback(async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from<ReviewType>("reviews")
-      .select("*")
-      .order("created_at", { ascending: false });
+	// Fetch reviews from Supabase
+	const fetchReviews = useCallback(async () => {
+		setLoading(true);
+		const { data, error } = await supabase
+			.from("reviews")
+			.select("*")
+			.order("created_at", { ascending: false });
 
-    if (error) setError(error.message);
-    else setReviews(data || []);
+		if (error) setError(error.message);
+		else setReviews(data || []);
 
-    setLoading(false);
-  }, []);
+		setLoading(false);
+	}, []);
 
-  useEffect(() => {
-    fetchReviews();
-  }, [fetchReviews]);
+	useEffect(() => {
+		fetchReviews();
+	}, [fetchReviews]);
 
-  return { reviews, loading, error, fetchReviews };
+	return { reviews, loading, error, fetchReviews };
 };

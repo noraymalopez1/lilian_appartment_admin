@@ -1,4 +1,4 @@
-create table public.listings (
+create table if not exists public.listings (
     uid text primary key,
 
     title text,
