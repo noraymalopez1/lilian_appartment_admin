@@ -1,5 +1,6 @@
 export interface IReview {
 	uid: string;
+	listing_id: string;
 	title: string;
 	description: string;
 	rating: number;
