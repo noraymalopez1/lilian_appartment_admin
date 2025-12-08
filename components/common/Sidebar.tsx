@@ -5,6 +5,7 @@ import {
   BellIcon,
   Building2,
   CalendarCheck,
+  Car,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -26,6 +27,11 @@ const sideBarItems = [
     title: "Booking",
     to: "/bookings",
     icon: <CalendarCheck size={24} />,
+  },
+  {
+    title: "Taxis",
+    to: "/taxis",
+    icon: <Car size={24} />,
   },
   {
     title: "Add Listing",

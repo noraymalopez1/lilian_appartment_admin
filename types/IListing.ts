@@ -4,7 +4,7 @@ export interface IListing {
 	category?: string;
 	tags?: string;
 	description?: string;
-	price?: Record<string, number>;
+	price?: { adult: number; child: number };
 	images?: string[];
 	zipcode?: string;
 	city?: string;

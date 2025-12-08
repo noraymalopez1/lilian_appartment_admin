@@ -3,11 +3,12 @@ import {
   CalendarClock,
   CalendarIcon,
   ChevronRight,
-  ScrollText,
+  Car,
+  Building2,
+  Clock,
 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { parseDate } from "chrono-node";
-import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -25,6 +26,13 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableHeader,
   TableRow,
@@ -32,8 +40,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils"; // Assumed utility for conditional classes
-
+import { cn } from "@/lib/utils";
 import { useEffect, useRef } from "react";
 import {
   Chart,
@@ -46,6 +53,7 @@ import {
   Filler,
   Tooltip,
 } from "chart.js";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
 
 Chart.register(
   LineController,
@@ -58,125 +66,15 @@ Chart.register(
   Tooltip
 );
 
-// C. Data Table Component (from image 2)
-const bookingData = [
-  {
-    date: "2022-01-05",
-    type: "Suite",
-    id: "GKLMDC",
-    checkIn: "2022-01-05",
-    checkOut: "2022-01-05",
-    refundable: "Yes",
-    tariff: "$1200",
-    payment: "Card",
-    status: "Paid",
-  },
-  {
-    date: "2022-01-05",
-    type: "Royal Suite",
-    id: "GKLMDC",
-    checkIn: "2022-01-05",
-    checkOut: "2022-01-05",
-    refundable: "No",
-    tariff: "$1200",
-    payment: "Card",
-    status: "Unpaid",
-  },
-  {
-    date: "2022-01-05",
-    type: "Deluxe",
-    id: "GKLMDC",
-    checkIn: "2022-01-05",
-    checkOut: "2022-01-05",
-    refundable: "Yes",
-    tariff: "$1200",
-    payment: "Cash",
-    status: "Paid",
-  },
-  {
-    date: "2022-01-05",
-    type: "Luxury",
-    id: "GKLMDC",
-    checkIn: "2022-01-05",
-    checkOut: "2022-01-05",
-    refundable: "No",
-    tariff: "$1200",
-    payment: "Card",
-    status: "Unpaid",
-  },
-  {
-    date: "2022-01-05",
-    type: "Deluxe",
-    id: "GKLMDC",
-    checkIn: "2022-01-05",
-    checkOut: "2022-01-05",
-    refundable: "Yes",
-    tariff: "$1200",
-    payment: "Card",
-    status: "Paid",
-  },
-  {
-    date: "2022-01-05",
-    type: "Deluxe",
-    id: "GKLMDC",
-    checkIn: "2022-01-05",
-    checkOut: "2022-01-05",
-    refundable: "No",
-    tariff: "$1200",
-    payment: "Card",
-    status: "Unpaid",
-  },
-  {
-    date: "2022-01-05",
-    type: "Deluxe",
-    id: "GKLMDC",
-    checkIn: "2022-01-05",
-    checkOut: "2022-01-05",
-    refundable: "Yes",
-    tariff: "$1200",
-    payment: "Card",
-    status: "Paid",
-  },
-  {
-    date: "2022-01-05",
-    type: "Deluxe",
-    id: "GKLMDC",
-    checkIn: "2022-01-05",
-    checkOut: "2022-01-05",
-    refundable: "No",
-    tariff: "$1200",
-    payment: "Card",
-    status: "Unpaid",
-  },
-  {
-    date: "2022-01-05",
-    type: "Deluxe",
-    id: "GKLMDC",
-    checkIn: "2022-01-05",
-    checkOut: "2022-01-05",
-    refundable: "Yes",
-    tariff: "$1200",
-    payment: "Card",
-    status: "Paid",
-  },
-];
-
 const getStatusColor = (status: string) => {
-  if (status === "Paid") return "text-green-600 bg-green-50";
-  if (status === "Unpaid") return "text-red-600 bg-red-50";
+  if (status === "confirmed" || status === "completed") return "text-green-600 bg-green-50";
+  if (status === "pending") return "text-yellow-600 bg-yellow-50";
+  if (status === "cancelled") return "text-red-600 bg-red-50";
   return "text-gray-600 bg-gray-50";
 };
 
-const getRefundableColor = (refundable: string) => {
-  if (refundable === "Yes") return "text-green-600 font-medium";
-  if (refundable === "No") return "text-red-600 font-medium";
-  return "text-gray-900";
-};
-
-function formatDate(date: Date | undefined) {
-  if (!date) {
-    return "";
-  }
+function formatDateDisplay(date: Date | undefined) {
+  if (!date) return "";
   return date.toLocaleDateString("en-US", {
     day: "2-digit",
     month: "long",
@@ -184,15 +82,52 @@ function formatDate(date: Date | undefined) {
   });
 }
 
-const page = () => {
-  const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("In 2 days");
-  const [date, setDate] = React.useState<Date | undefined>(
-    parseDate(value) || undefined
-  );
-  const [month, setMonth] = React.useState<Date | undefined>(date);
+function formatTableDate(dateStr: string) {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
+}
+
+const Dashboard = () => {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("In 2 days");
+  const [date, setDate] = useState<Date | undefined>(parseDate(value) || undefined);
+  const [month, setMonth] = useState<Date | undefined>(date);
   const chartRef = useRef<HTMLCanvasElement | null>(null);
   const chartInstance = useRef<Chart | null>(null);
+
+  const [chartType, setChartType] = useState<"yearly" | "monthly">("yearly");
+  const [listingTypeFilter, setListingTypeFilter] = useState<string>("all");
+  const [entriesCount, setEntriesCount] = useState<number>(10);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const {
+    stats,
+    monthlyData,
+    recentBookings,
+    loading,
+    error,
+    fetchStats,
+    fetchMonthlyData,
+    fetchRecentBookings,
+  } = useDashboardStats();
+
+  useEffect(() => {
+    fetchStats();
+    fetchMonthlyData("yearly");
+    fetchRecentBookings(10);
+  }, [fetchStats, fetchMonthlyData, fetchRecentBookings]);
+
+  useEffect(() => {
+    fetchMonthlyData(chartType);
+  }, [chartType, fetchMonthlyData]);
+
+  useEffect(() => {
+    fetchRecentBookings(entriesCount, listingTypeFilter);
+  }, [entriesCount, listingTypeFilter, fetchRecentBookings]);
 
   useEffect(() => {
     if (chartInstance.current) {
@@ -204,48 +139,41 @@ const page = () => {
     const ctx = chartRef.current.getContext("2d");
     if (!ctx) return;
 
+    const chartData = monthlyData.length > 0
+      ? monthlyData.map((m) => m.count)
+      : Array(12).fill(0);
+
+    const labels = monthlyData.length > 0
+      ? monthlyData.map((m) => m.month)
+      : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
     chartInstance.current = new Chart(ctx, {
       type: "line",
       data: {
-        labels: [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
-        ],
+        labels,
         datasets: [
           {
             label: "Bookings",
-            data: [
-              4200, 6000, 5900, 4800, 5000, 4900, 3500, 2200, 2600, 4300, 3900,
-              4100,
-            ],
+            data: chartData,
             borderColor: "#9a4d13",
             backgroundColor: "rgba(154, 77, 19, 0.15)",
             borderWidth: 3,
             pointBackgroundColor: "#9a4d13",
             pointRadius: 5,
             tension: 0.4,
-            fill: false,
+            fill: true,
           },
         ],
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
           tooltip: {
             callbacks: {
               label: (ctx) =>
-                ctx.parsed.y !== null ? `$${ctx.parsed.y.toLocaleString()}` : "",
+                ctx.parsed.y !== null ? `${ctx.parsed.y} bookings` : "",
             },
             backgroundColor: "white",
             bodyColor: "black",
@@ -255,14 +183,9 @@ const page = () => {
         },
         scales: {
           y: {
-            beginAtZero: false,
+            beginAtZero: true,
             ticks: {
-              callback: (v) => {
-                if (typeof v === "number") {
-                  return `${v / 1000}k`;
-                }
-                return v;
-              },
+              callback: (v) => (typeof v === "number" ? v : v),
               color: "#6b7280",
             },
             grid: { color: "#f3f4f6" },
@@ -274,15 +197,67 @@ const page = () => {
         },
       },
     });
-  }, []);
+
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
+    };
+  }, [monthlyData]);
+
+  const filteredBookings = recentBookings.filter((booking) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      booking.first_name?.toLowerCase().includes(query) ||
+      booking.last_name?.toLowerCase().includes(query) ||
+      booking.email?.toLowerCase().includes(query) ||
+      booking.uid?.toLowerCase().includes(query) ||
+      booking.listing_type?.toLowerCase().includes(query)
+    );
+  });
+
+  const statCards = [
+    {
+      title: "Total Bookings",
+      value: loading ? "..." : stats.totalBookings.toLocaleString(),
+      icon: <CalendarClock size={24} />,
+    },
+    {
+      title: "Total Taxi Bookings",
+      value: loading ? "..." : stats.totalTaxiBookings.toLocaleString(),
+      icon: <Car size={24} />,
+    },
+    {
+      title: "Total Listings",
+      value: loading ? "..." : stats.totalListings.toLocaleString(),
+      icon: <Building2 size={24} />,
+    },
+    {
+      title: "Total Taxis",
+      value: loading ? "..." : stats.totalTaxis.toLocaleString(),
+      icon: <Car size={24} />,
+    },
+    {
+      title: "Pending Bookings",
+      value: loading ? "..." : stats.pendingBookings.toLocaleString(),
+      icon: <Clock size={24} />,
+    },
+    {
+      title: "Pending Taxi Bookings",
+      value: loading ? "..." : stats.pendingTaxiBookings.toLocaleString(),
+      icon: <Clock size={24} />,
+    },
+  ];
+
   return (
     <div className="w-full px-2 md:px-0 pt-4 md:pt-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold">All Reports</h2>
+          <h2 className="text-3xl font-bold">Dashboard</h2>
           <p className="flex items-center gap-2">
-            <a href="/">Miscellaneous</a> <ChevronRight size={16} /> Reports{" "}
+            <a href="/">Home</a> <ChevronRight size={16} /> Dashboard{" "}
             <ChevronRight size={16} />
           </p>
         </div>
@@ -332,60 +307,7 @@ const page = () => {
                     onMonthChange={setMonth}
                     onSelect={(date) => {
                       setDate(date);
-                      setValue(formatDate(date));
-                      setOpen(false);
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-          <div className="flex flex-col gap-3">
-            <div className="relative flex gap-2">
-              <Input
-                id="date"
-                value={value}
-                placeholder="Tomorrow or next week"
-                className="bg-background pl-10"
-                onChange={(e) => {
-                  setValue(e.target.value);
-                  const date = parseDate(e.target.value);
-                  if (date) {
-                    setDate(date);
-                    setMonth(date);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "ArrowDown") {
-                    e.preventDefault();
-                    setOpen(true);
-                  }
-                }}
-              />
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    id="date-picker"
-                    variant="ghost"
-                    className="absolute top-1/2 left-2 size-6 -translate-y-1/2"
-                  >
-                    <CalendarIcon className="size-3.5" />
-                    <span className="sr-only">Select date</span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto overflow-hidden p-0"
-                  align="end"
-                >
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    captionLayout="dropdown"
-                    month={month}
-                    onMonthChange={setMonth}
-                    onSelect={(date) => {
-                      setDate(date);
-                      setValue(formatDate(date));
+                      setValue(formatDateDisplay(date));
                       setOpen(false);
                     }}
                   />
@@ -395,33 +317,23 @@ const page = () => {
           </div>
         </div>
       </div>
-      {/* stats */}
+
+      {/* Error message */}
+      {error && (
+        <div className="mt-4 p-4 bg-red-50 text-red-600 rounded-lg">
+          Error loading data: {error}
+        </div>
+      )}
+
+      {/* Stats */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[
-          {
-            title: "Total Bookings",
-            value: "1,234",
-            icon: <CalendarClock size={24} />,
-          },
-          {
-            title: "Total Listings",
-            value: "1,234",
-            icon: <ScrollText size={24} />,
-          },
-          {
-            title: "Pending Requests",
-            value: "1,234",
-            icon: <CalendarClock size={24} />,
-          },
-        ].map((stat, index) => (
+        {statCards.map((stat, index) => (
           <div
             key={index}
             className="flex items-center gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100"
           >
             <div className="flex items-center justify-center bg-[#FFF6ED] p-3 rounded-lg">
-              <div className="text-[#99582A]">
-                {stat.icon}
-              </div>
+              <div className="text-[#99582A]">{stat.icon}</div>
             </div>
             <div>
               <p className="text-sm text-gray-500">{stat.title}</p>
@@ -433,81 +345,63 @@ const page = () => {
 
       {/* Chart and sidebar Section */}
       <div className="flex flex-col lg:flex-row w-full mt-8 gap-6">
-        {/* Card One (70%) */}
+        {/* Chart Card */}
         <div className="w-full lg:w-[70%]">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 w-full">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 w-full h-full">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-gray-900">Booking Analysis</h2>
-              <select className="border rounded-md px-3 py-1 text-sm bg-transparent outline-none focus:ring-2 focus:ring-orange-500/20">
-                <option>Yearly</option>
-                <option>Monthly</option>
-              </select>
+              <Select
+                value={chartType}
+                onValueChange={(val) => setChartType(val as "yearly" | "monthly")}
+              >
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="yearly">Yearly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="relative h-[300px] w-full">
+            <div className="h-[350px] w-full">
               <canvas ref={chartRef}></canvas>
             </div>
           </div>
         </div>
-        {/* Card Two (30%) */}
+        {/* Quick Stats Card */}
         <div className="w-full lg:w-[30%]">
           <Card className="rounded-xl shadow-sm border border-gray-100 p-0 overflow-hidden h-full">
-            {" "}
-            {/* Adjusted padding for a tighter look */}
             <CardHeader className="pb-2 px-6 pt-6">
-              {" "}
-              {/* Adjusted padding for header */}
               <CardTitle className="text-xl font-bold text-gray-900">
-                Top Booking Source
+                Quick Stats
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              {" "}
-              {/* Remove padding from card content */}
-              <div className="max-h-[300px] overflow-y-auto">
-                {" "}
-                {/* Max height with scrollbar */}
-                <Table>
-                  <TableHeader className="sticky top-0 bg-white z-10 border-b border-gray-100">
-                    <TableRow className="hover:bg-transparent">
-                      {" "}
-                      {/* Prevent hover effect on header */}
-                      <TableHead className="text-gray-500 font-medium text-sm px-6 py-3">
-                        Source Name
-                      </TableHead>
-                      <TableHead className="text-gray-500 font-medium text-sm text-right px-6 py-3">
-                        Booking No
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {[
-                      { sourceName: "Booking.com", bookingNo: 987 },
-                      { sourceName: "Lillians apartment", bookingNo: 987 },
-                      { sourceName: "Booking.com", bookingNo: 987 },
-                      { sourceName: "Hotka", bookingNo: 987 },
-                      { sourceName: "Gozayan", bookingNo: 987 },
-                      { sourceName: "Trip Plus", bookingNo: 987 },
-                      { sourceName: "Booking.com", bookingNo: 987 },
-                      // Add more data as needed to show scrollbar
-                      { sourceName: "Airbnb", bookingNo: 720 },
-                      { sourceName: "Expedia", bookingNo: 610 },
-                      { sourceName: "Direct", bookingNo: 550 },
-                      { sourceName: "Trivago", bookingNo: 480 },
-                    ].map((item, index) => (
-                      <TableRow
-                        key={index}
-                        className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
-                      >
-                        <TableCell className="font-medium text-gray-800 px-6 py-3">
-                          {item.sourceName}
-                        </TableCell>
-                        <TableCell className="text-right text-gray-800 font-medium px-6 py-3">
-                          {item.bookingNo}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span className="text-gray-600">All Bookings</span>
+                  <span className="font-bold text-gray-900">
+                    {loading ? "..." : (stats.totalBookings + stats.totalTaxiBookings).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span className="text-gray-600">All Listings</span>
+                  <span className="font-bold text-gray-900">
+                    {loading ? "..." : stats.totalListings.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span className="text-gray-600">Active Taxis</span>
+                  <span className="font-bold text-gray-900">
+                    {loading ? "..." : stats.totalTaxis.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                  <span className="text-yellow-700">Pending</span>
+                  <span className="font-bold text-yellow-700">
+                    {loading ? "..." : (stats.pendingBookings + stats.pendingTaxiBookings).toLocaleString()}
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -517,77 +411,67 @@ const page = () => {
       {/* Report Table */}
       <div className="container mx-auto py-6 mt-8">
         <div>
-          <h2 className="text-2xl font-medium mb-2">
-            Apartment Booking Report
-          </h2>
+          <h2 className="text-2xl font-medium mb-2">Recent Booking Report</h2>
         </div>
-        {/* --- Horizontal Line --- */}
         <hr className="border-gray-200" />
 
-        {/* Data Table Section (Image 2) */}
         <Card className="p-6 border-gray-200 shadow-md">
           <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            {/* Search Input */}
             <div className="relative w-full md:max-w-xs">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
               <Input
-                placeholder="Search"
+                placeholder="Search bookings..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 h-10 rounded-lg border-gray-300 focus-visible:ring-0"
               />
             </div>
 
-            {/* Action Buttons */}
             <div className="flex gap-3 flex-wrap justify-end">
-              <Button
-                variant="outline"
-                className="border-gray-300 text-gray-700 h-10 rounded-lg px-4"
+              <Select
+                value={listingTypeFilter}
+                onValueChange={setListingTypeFilter}
               >
-                Download <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-              </Button>
-              <Button
-                variant="outline"
-                className="border-gray-300 text-gray-700 h-10 rounded-lg px-4"
-              >
-                Show <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-              </Button>
-              <Button
-                variant="outline"
-                className="border-gray-300 text-gray-700 h-10 rounded-lg px-4"
-              >
-                Columns <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-              </Button>
-              <Button
-                variant="outline"
-                className="border-gray-300 text-gray-700 h-10 rounded-lg px-4"
-              >
-                Filter
-              </Button>
-              <Button
-                variant="outline"
-                className="border-gray-300 text-gray-700 h-10 rounded-lg px-4"
-              >
-                View
-              </Button>
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white h-10 rounded-lg px-4">
-                All Bookings <ChevronDown className="ml-2 h-4 w-4 opacity-70" />
-              </Button>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Filter Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="apartment">Apartment</SelectItem>
+                  <SelectItem value="attraction">Attraction</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="border-gray-300 text-gray-700 h-10 rounded-lg px-4"
+                  >
+                    Show {entriesCount} <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setEntriesCount(5)}>Show 5 entries</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setEntriesCount(10)}>Show 10 entries</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setEntriesCount(20)}>Show 20 entries</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
-          {/* Table */}
           <div className="overflow-x-auto">
             <Table>
               <TableHeader className="bg-gray-50">
                 <TableRow className="border-b-gray-200">
                   {[
                     "Booking Date",
-                    "Booking Type",
+                    "Customer",
                     "Booking ID",
-                    "Check-In Date",
-                    "Check-Out Date",
-                    "Refundable",
-                    "Booking Tariff",
-                    "Payment Method",
+                    "Type",
+                    "Check-In",
+                    "Check-Out",
+                    "Total Price",
                     "Status",
                   ].map((header) => (
                     <TableHead
@@ -600,102 +484,60 @@ const page = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {bookingData.map((booking, index) => (
-                  <TableRow
-                    key={index}
-                    className="border-b-gray-100 hover:bg-gray-50"
-                  >
-                    <TableCell className="text-gray-800">
-                      {booking.date}
-                    </TableCell>
-                    <TableCell className="text-gray-800 font-medium">
-                      {booking.type}
-                    </TableCell>
-                    <TableCell className="text-gray-500">
-                      {booking.id}
-                    </TableCell>
-                    <TableCell className="text-gray-800">
-                      {booking.checkIn}
-                    </TableCell>
-                    <TableCell className="text-gray-800">
-                      {booking.checkOut}
-                    </TableCell>
-                    <TableCell
-                      className={getRefundableColor(booking.refundable)}
-                    >
-                      {booking.refundable}
-                    </TableCell>
-                    <TableCell className="text-gray-800">
-                      {booking.tariff}
-                    </TableCell>
-                    <TableCell className="text-gray-800">
-                      {booking.payment}
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={cn(
-                          "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold",
-                          getStatusColor(booking.status)
-                        )}
-                      >
-                        {booking.status}
-                      </span>
+                {filteredBookings.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center text-gray-500 py-8">
+                      No bookings found
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  filteredBookings.map((booking, index) => (
+                    <TableRow
+                      key={booking.uid || index}
+                      className="border-b-gray-100 hover:bg-gray-50"
+                    >
+                      <TableCell className="text-gray-800">
+                        {formatTableDate(booking.created_at)}
+                      </TableCell>
+                      <TableCell className="text-gray-800 font-medium">
+                        {booking.first_name} {booking.last_name}
+                      </TableCell>
+                      <TableCell className="text-gray-500 font-mono text-xs">
+                        {booking.uid?.slice(0, 8)}...
+                      </TableCell>
+                      <TableCell className="text-gray-800 capitalize">
+                        {booking.listing_type}
+                      </TableCell>
+                      <TableCell className="text-gray-800">
+                        {formatTableDate(booking.check_in)}
+                      </TableCell>
+                      <TableCell className="text-gray-800">
+                        {formatTableDate(booking.check_out)}
+                      </TableCell>
+                      <TableCell className="text-gray-800 font-medium">
+                        ${booking.total_price?.toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold capitalize",
+                            getStatusColor(booking.status)
+                          )}
+                        >
+                          {booking.status}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
 
-          {/* Pagination */}
           <div className="flex justify-between items-center pt-4 border-t border-gray-100 mt-4">
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="h-9 px-4 rounded-lg border-gray-300 text-gray-500"
-                disabled
-              >
-                ← Previous
-              </Button>
-              <Button className="h-9 px-4 rounded-lg bg-green-500 hover:bg-green-600 text-white font-medium">
-                1
-              </Button>
-              <Button
-                variant="outline"
-                className="h-9 px-4 rounded-lg border-gray-300 text-gray-500"
-              >
-                2
-              </Button>
-              <Button
-                variant="outline"
-                className="h-9 px-4 rounded-lg border-gray-300 text-gray-500"
-              >
-                3
-              </Button>
-              <Button
-                variant="outline"
-                className="h-9 px-4 rounded-lg border-gray-300 text-gray-500"
-              >
-                Next →
-              </Button>
-            </div>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="h-9 px-4 rounded-lg border-gray-300 text-gray-500"
-                >
-                  Show 10 entries{" "}
-                  <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>Show 5 entries</DropdownMenuItem>
-                <DropdownMenuItem>Show 10 entries</DropdownMenuItem>
-                <DropdownMenuItem>Show 20 entries</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <p className="text-sm text-gray-500">
+              Showing {filteredBookings.length} of {recentBookings.length} entries
+            </p>
           </div>
         </Card>
       </div>
@@ -703,4 +545,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Dashboard;

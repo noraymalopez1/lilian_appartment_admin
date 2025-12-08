@@ -1,12 +1,18 @@
 "use client";
-import { ChevronRight, CirclePlus, Funnel, Loader2 } from "lucide-react";
+import { ChevronRight, Loader2 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import {
   useBookings,
   BookingsFilter,
   BookingsSort,
 } from "@/hooks/useBookings";
+import {
+  useTaxiBookings,
+  TaxiBookingsFilter,
+  TaxiBookingsSort,
+} from "@/hooks/useTaxiBookings";
 import { IBooking } from "@/types/IBooking";
+import { ITaxiBooking } from "@/types/ITaxiBooking";
 import {
   Select,
   SelectContent,
@@ -15,11 +21,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import TaxiBookingCard from "@/components/common/TaxiBookingCard";
 
-const BookingCard = ({ data }: { data: IBooking }) => {
+interface BookingCardProps {
+  data: IBooking;
+  onStatusChange: (id: string, status: string) => void;
+  onDelete: (id: string) => void;
+}
+
+const BookingCard = ({ data, onStatusChange, onDelete }: BookingCardProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Custom function to render the Status pills
   const StatusPill = ({ status }: { status: string }) => {
     let bgColor = "bg-gray-100";
     let textColor = "text-gray-600";
@@ -67,7 +79,6 @@ const BookingCard = ({ data }: { data: IBooking }) => {
       <div className="flex flex-grow items-start space-x-4 pr-6 mb-4 md:mb-0">
         {/* Image */}
         <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
-          {/* Placeholder for image */}
           <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
             No Image
           </div>
@@ -144,11 +155,58 @@ const BookingCard = ({ data }: { data: IBooking }) => {
         </button>
 
         {isMenuOpen && (
-          <div className="absolute right-0 top-8 mt-2 w-32 bg-white rounded-lg shadow-xl z-10 border border-gray-200">
-            <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-              Edit
-            </button>
-            <button className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+          <div className="absolute right-0 top-8 mt-2 w-40 bg-white rounded-lg shadow-xl z-10 border border-gray-200">
+            {data.status === "pending" && (
+              <>
+                <button
+                  onClick={() => {
+                    onStatusChange(data.uid, "confirmed");
+                    setIsMenuOpen(false);
+                  }}
+                  className="block w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-gray-100"
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => {
+                    onStatusChange(data.uid, "cancelled");
+                    setIsMenuOpen(false);
+                  }}
+                  className="block w-full text-left px-4 py-2 text-sm text-yellow-600 hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+            {data.status === "confirmed" && (
+              <button
+                onClick={() => {
+                  onStatusChange(data.uid, "completed");
+                  setIsMenuOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
+              >
+                Mark Completed
+              </button>
+            )}
+            {(data.status === "confirmed" || data.status === "pending") && (
+              <button
+                onClick={() => {
+                  onStatusChange(data.uid, "cancelled");
+                  setIsMenuOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+              >
+                Cancel Booking
+              </button>
+            )}
+            <button
+              onClick={() => {
+                onDelete(data.uid);
+                setIsMenuOpen(false);
+              }}
+              className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 border-t border-gray-100"
+            >
               Delete
             </button>
           </div>
@@ -194,26 +252,73 @@ const DateBlock = ({
 );
 
 const Booking = () => {
-  const { bookings, loading, error, totalCount, fetchBookings } = useBookings();
+  const {
+    bookings,
+    loading,
+    error,
+    totalCount,
+    fetchBookings,
+    updateBooking,
+    deleteBooking,
+  } = useBookings();
+  const {
+    taxiBookings,
+    loading: taxiLoading,
+    error: taxiError,
+    totalCount: taxiTotalCount,
+    fetchTaxiBookings,
+    updateTaxiBookingStatus,
+    deleteTaxiBooking,
+  } = useTaxiBookings();
+
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
-  const [filters, setFilters] = useState<BookingsFilter>({
-    status: "all",
-  });
+  const [listingType, setListingType] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<BookingsSort>({
     field: "created_at",
     order: "desc",
   });
 
+  const isTaxiFilter = listingType === "taxi";
+
   useEffect(() => {
-    fetchBookings(page, limit, filters, sortBy);
-  }, [fetchBookings, page, limit, filters, sortBy]);
+    if (isTaxiFilter) {
+      const taxiFilters: TaxiBookingsFilter = {};
+      if (statusFilter !== "all") {
+        taxiFilters.status = statusFilter as TaxiBookingsFilter["status"];
+      }
+      const taxiSort: TaxiBookingsSort = {
+        field: sortBy.field === "total_price" ? "price" : (sortBy.field as TaxiBookingsSort["field"]),
+        order: sortBy.order,
+      };
+      fetchTaxiBookings(page, limit, taxiFilters, taxiSort);
+    } else {
+      const bookingFilters: BookingsFilter = {};
+      if (listingType !== "all") {
+        bookingFilters.listing_type = listingType;
+      }
+      if (statusFilter !== "all") {
+        bookingFilters.status = statusFilter as BookingsFilter["status"];
+      }
+      fetchBookings(page, limit, bookingFilters, sortBy);
+    }
+  }, [fetchBookings, fetchTaxiBookings, page, limit, statusFilter, sortBy, listingType, isTaxiFilter]);
 
-  const totalPages = Math.ceil(totalCount / limit);
+  const currentTotalCount = isTaxiFilter ? taxiTotalCount : totalCount;
+  const totalPages = Math.ceil(currentTotalCount / limit);
+  const isLoading = isTaxiFilter ? taxiLoading : loading;
+  const currentError = isTaxiFilter ? taxiError : error;
 
-  const handleFilterChange = (key: keyof BookingsFilter, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value === "all" ? undefined : value }));
-    setPage(1); // Reset to first page on filter change
+  const handleListingTypeChange = (value: string) => {
+    setListingType(value);
+    setStatusFilter("all");
+    setPage(1);
+  };
+
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+    setPage(1);
   };
 
   const handleSortChange = (value: string) => {
@@ -223,6 +328,26 @@ const Booking = () => {
     ];
     setSortBy({ field, order });
     setPage(1);
+  };
+
+  const handleBookingStatusChange = async (id: string, status: string) => {
+    await updateBooking(id, { status });
+  };
+
+  const handleBookingDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this booking?")) {
+      await deleteBooking(id);
+    }
+  };
+
+  const handleTaxiStatusChange = async (id: string, status: ITaxiBooking["status"]) => {
+    await updateTaxiBookingStatus(id, status);
+  };
+
+  const handleTaxiDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this taxi booking?")) {
+      await deleteTaxiBooking(id);
+    }
   };
 
   return (
@@ -241,7 +366,8 @@ const Booking = () => {
         <div className="flex flex-wrap items-center gap-4">
           {/* Listing Type Filter */}
           <Select
-            onValueChange={(val) => handleFilterChange("listing_type", val)}
+            value={listingType}
+            onValueChange={handleListingTypeChange}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Listing Type" />
@@ -254,25 +380,35 @@ const Booking = () => {
             </SelectContent>
           </Select>
 
-          {/* Status Filter (Active/Expired) */}
+          {/* Status Filter */}
           <Select
-            onValueChange={(val) => handleFilterChange("status", val)}
-            defaultValue="all"
+            value={statusFilter}
+            onValueChange={handleStatusFilterChange}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="expired">Expired</SelectItem>
+              {isTaxiFilter ? (
+                <>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </>
+              ) : (
+                <>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="expired">Expired</SelectItem>
+                </>
+              )}
             </SelectContent>
           </Select>
 
           {/* Sort Filter */}
           <Select
+            value={`${sortBy.field}-${sortBy.order}`}
             onValueChange={handleSortChange}
-            defaultValue="created_at-desc"
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Sort By" />
@@ -284,36 +420,52 @@ const Booking = () => {
               <SelectItem value="total_price-asc">Price: Low to High</SelectItem>
             </SelectContent>
           </Select>
-
-          <Button className="bg-[#99582A] text-white flex items-center gap-2">
-            Add Booking <CirclePlus size={20} />
-          </Button>
         </div>
       </div>
 
       {/* Content */}
       <div className="mt-4">
         <div className="max-w-6xl w-full mx-auto">
-          {loading ? (
+          {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
             </div>
-          ) : error ? (
-            <div className="text-center text-red-500 py-10">Error: {error}</div>
+          ) : currentError ? (
+            <div className="text-center text-red-500 py-10">Error: {currentError}</div>
+          ) : isTaxiFilter ? (
+            taxiBookings.length === 0 ? (
+              <div className="text-center text-gray-500 py-10">
+                No taxi bookings found.
+              </div>
+            ) : (
+              taxiBookings.map((booking) => (
+                <TaxiBookingCard
+                  key={booking.uid}
+                  data={booking}
+                  onStatusChange={handleTaxiStatusChange}
+                  onDelete={handleTaxiDelete}
+                />
+              ))
+            )
           ) : bookings.length === 0 ? (
             <div className="text-center text-gray-500 py-10">
               No bookings found.
             </div>
           ) : (
             bookings.map((booking) => (
-              <BookingCard key={booking.uid} data={booking} />
+              <BookingCard
+                key={booking.uid}
+                data={booking}
+                onStatusChange={handleBookingStatusChange}
+                onDelete={handleBookingDelete}
+              />
             ))
           )}
         </div>
       </div>
 
       {/* Pagination */}
-      {!loading && totalCount > 0 && (
+      {!isLoading && currentTotalCount > 0 && (
         <div className="flex justify-center items-center gap-4 mt-6 mb-10">
           <Button
             variant="outline"
@@ -327,7 +479,7 @@ const Booking = () => {
           </span>
           <Button
             variant="outline"
-            disabled={page === totalPages}
+            disabled={page === totalPages || totalPages === 0}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
           >
             Next

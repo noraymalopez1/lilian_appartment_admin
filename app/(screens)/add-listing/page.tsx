@@ -14,7 +14,8 @@ const listingSchema = z.object({
   category: z.enum(["apartment", "attraction"]),
   tags: z.string().min(1, "Tags are required (comma separated)"),
   description: z.string().min(20, "Description is required (min 20 chars)"),
-  price: z.record(z.string(), z.number()).optional(),
+  price_adult: z.number().min(0, "Adult price is required").optional(),
+  price_child: z.number().min(0, "Child price is required").optional(),
   images: z.array(z.string()).optional(),
   zipcode: z.string().min(3, "Zipcode is required"),
   city: z.string().min(2, "City is required"),
@@ -59,9 +60,8 @@ export default function AddListingPage() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
-  const [priceEntries, setPriceEntries] = useState<Array<{ key: string; value: string }>>([
-    { key: "", value: "" },
-  ]);
+  const [adultPrice, setAdultPrice] = useState<string>("");
+  const [childPrice, setChildPrice] = useState<string>("");
   const [accessibilityPoints, setAccessibilityPoints] = useState<string[]>([""]);
   const [rules, setRules] = useState<string[]>([""]);
   const [submitting, setSubmitting] = useState(false);
@@ -159,16 +159,15 @@ export default function AddListingPage() {
         imageUrls = await uploadImagesToSupabase();
       }
 
-      const priceObject: Record<string, number> = {};
-      priceEntries.forEach((entry) => {
-        if (entry.key && entry.value) {
-          priceObject[entry.key] = parseFloat(entry.value);
-        }
-      });
+      const priceObject = (adultPrice || childPrice) ? {
+        adult: parseFloat(adultPrice) || 0,
+        child: parseFloat(childPrice) || 0,
+      } : undefined;
 
+      const { price_adult, price_child, ...restData } = data;
       const formattedData = {
-        ...data,
-        price: Object.keys(priceObject).length > 0 ? priceObject : undefined,
+        ...restData,
+        price: priceObject,
         images: imageUrls.length > 0 ? imageUrls : undefined,
         accessibility_points: accessibilityPoints.filter((point) => point.trim() !== ""),
         rules: rules.filter((rule) => rule.trim() !== ""),
@@ -362,66 +361,41 @@ export default function AddListingPage() {
         <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-10">
           <h2 className="text-2xl font-bold mb-6">Pricing</h2>
           <p className="text-sm text-gray-600 mb-4">
-            Add different price tiers (e.g. "per night", "weekend rate", "monthly")
+            Set the price for adults and children
           </p>
 
-          {priceEntries.map((entry, index) => (
-            <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price Label (e.g. "per night", "weekend")
-                </label>
-                <input
-                  type="text"
-                  value={entry.key}
-                  onChange={(e) => {
-                    const newEntries = [...priceEntries];
-                    newEntries[index].key = e.target.value;
-                    setPriceEntries(newEntries);
-                  }}
-                  placeholder="e.g. per night"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price Amount</label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={entry.value}
-                    onChange={(e) => {
-                      const newEntries = [...priceEntries];
-                      newEntries[index].value = e.target.value;
-                      setPriceEntries(newEntries);
-                    }}
-                    placeholder="e.g. 150"
-                    className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  {index === priceEntries.length - 1 ? (
-                    <button
-                      type="button"
-                      onClick={() => setPriceEntries([...priceEntries, { key: "", value: "" }])}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                      +
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newEntries = priceEntries.filter((_, i) => i !== index);
-                        setPriceEntries(newEntries);
-                      }}
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                    >
-                      −
-                    </button>
-                  )}
-                </div>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="price_adult" className="block text-sm font-medium text-gray-700 mb-1">
+                Adult Price ($)
+              </label>
+              <input
+                type="number"
+                id="price_adult"
+                step="0.01"
+                min="0"
+                value={adultPrice}
+                onChange={(e) => setAdultPrice(e.target.value)}
+                placeholder="e.g. 150"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
             </div>
-          ))}
+            <div>
+              <label htmlFor="price_child" className="block text-sm font-medium text-gray-700 mb-1">
+                Child Price ($)
+              </label>
+              <input
+                type="number"
+                id="price_child"
+                step="0.01"
+                min="0"
+                value={childPrice}
+                onChange={(e) => setChildPrice(e.target.value)}
+                placeholder="e.g. 75"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Images Upload */}
