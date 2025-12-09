@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { ChevronRight, CirclePlus, Funnel, EllipsisVertical } from "lucide-react";
+import { ChevronRight, CirclePlus, Funnel, EllipsisVertical, Calendar } from "lucide-react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { FaCircleChevronDown, FaLocationPin, FaStar } from "react-icons/fa6";
 import { useListings } from "@/hooks/useListings";
@@ -148,8 +148,8 @@ const ApartmentListing = () => {
                         <div className="flex items-center">
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold ${listing.status === "open"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
                               }`}
                           >
                             {listing.status || "open"}
@@ -164,7 +164,17 @@ const ApartmentListing = () => {
                           <EllipsisVertical size={24} />
                         </button>
                         {openMenuId === listing.uid && (
-                          <div className="absolute right-4 top-12 mt-2 w-32 bg-white rounded-lg shadow-xl z-10 border border-gray-200">
+                          <div className="absolute right-4 top-12 mt-2 w-40 bg-white rounded-lg shadow-xl z-10 border border-gray-200">
+                            <button
+                              onClick={() => {
+                                router.push(`/listing-calendar?id=${listing.uid}&type=apartment`);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <Calendar size={16} />
+                              View Calendar
+                            </button>
                             <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                               Edit
                             </button>
@@ -230,8 +240,8 @@ const ApartmentListing = () => {
           <div className="flex-grow flex justify-start items-center space-x-2">
             <button
               className={`${baseButtonClass} w-28 flex items-center justify-center ${currentPage === 1
-                  ? "bg-gray-50 text-gray-700 border-gray-300 cursor-not-allowed opacity-50"
-                  : "text-gray-700 hover:bg-gray-50 border-gray-300"
+                ? "bg-gray-50 text-gray-700 border-gray-300 cursor-not-allowed opacity-50"
+                : "text-gray-700 hover:bg-gray-50 border-gray-300"
                 }`}
               disabled={currentPage === 1}
               onClick={() => handlePageChange(currentPage - 1)}
@@ -246,8 +256,8 @@ const ApartmentListing = () => {
                   key={page}
                   onClick={() => handlePageChange(page)}
                   className={`${pageNumButtonClass} ${page === currentPage
-                      ? "bg-green-100 text-green-700 border-green-500 ring-2 ring-green-500 ring-opacity-50"
-                      : "text-gray-700 hover:bg-gray-50 border-gray-300"
+                    ? "bg-green-100 text-green-700 border-green-500 ring-2 ring-green-500 ring-opacity-50"
+                    : "text-gray-700 hover:bg-gray-50 border-gray-300"
                     }`}
                 >
                   {page}
@@ -257,8 +267,8 @@ const ApartmentListing = () => {
 
             <button
               className={`${baseButtonClass} w-24 flex items-center justify-center ${currentPage === totalPages
-                  ? "bg-gray-50 text-gray-700 border-gray-300 cursor-not-allowed opacity-50"
-                  : "text-gray-700 hover:bg-gray-50 border-gray-300"
+                ? "bg-gray-50 text-gray-700 border-gray-300 cursor-not-allowed opacity-50"
+                : "text-gray-700 hover:bg-gray-50 border-gray-300"
                 }`}
               disabled={currentPage === totalPages}
               onClick={() => handlePageChange(currentPage + 1)}
@@ -279,6 +289,8 @@ const ApartmentListing = () => {
           </div>
         </div>
       )}
+
+
     </div>
   );
 };

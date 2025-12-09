@@ -7,6 +7,7 @@ export const taxiPrices = {
 
 export interface ITaxiBooking {
 	uid: string;
+	taxi_uid: string;
 	pickup: string;
 	destination: string;
 	flight_no: string;
@@ -22,7 +23,7 @@ export interface ITaxiBooking {
 	luggage_quantity: string;
 	instruction: string;
 	car_type: "standard_sedan" | "premium_sedan" | "suv" | "mini_bus";
-	status: "pending" | "completed" | "cancelled";
+	status: "pending" | "active" | "completed" | "cancelled";
 	created_at?: string; // timestamptz from DB
 	price: number;
 }

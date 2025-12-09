@@ -1,5 +1,6 @@
 create table if not exists public.taxi_bookings (
 	uid text primary key,
+  taxi_uid text DEFAULT '',
   pickup text not null,  -- airport or hotel
   destination text not null, -- airport or hotel
   flight_no text not null,
@@ -15,7 +16,7 @@ create table if not exists public.taxi_bookings (
   luggage_quantity text not null,
   instruction text not null,
   car_type text not null, -- "standard_sedan", "premium_sedan", "suv", "mini_bus"
-  status text not null, -- "pending", "completed", "cancelled"
+  status text not null, -- "pending", "active" ,  "completed", "cancelled"
   created_at timestamptz default now()
   price numeric not null,
 );

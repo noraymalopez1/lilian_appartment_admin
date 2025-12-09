@@ -20,6 +20,7 @@ export interface BookingsSort {
 
 interface UseBookingsReturn {
 	bookings: IBooking[];
+	listingBookings: IBooking[];
 	loading: boolean;
 	error: string | null;
 	totalCount: number;
@@ -29,6 +30,7 @@ interface UseBookingsReturn {
 		filters?: BookingsFilter,
 		sortBy?: BookingsSort
 	) => Promise<void>;
+	fetchBookingsByListing: (listingId: string) => Promise<void>;
 	addBooking: (
 		booking: Omit<IBooking, "uid" | "created_at">
 	) => Promise<void>;
@@ -38,6 +40,7 @@ interface UseBookingsReturn {
 
 export const useBookings = (): UseBookingsReturn => {
 	const [bookings, setBookings] = useState<IBooking[]>([]);
+	const [listingBookings, setListingBookings] = useState<IBooking[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
 	const [totalCount, setTotalCount] = useState<number>(0);
@@ -168,12 +171,36 @@ export const useBookings = (): UseBookingsReturn => {
 		}
 	}, []);
 
+	const fetchBookingsByListing = useCallback(async (listingId: string) => {
+		setLoading(true);
+		setError(null);
+
+		try {
+			const { data, error } = await supabase
+				.from("bookings")
+				.select("*")
+				.eq("listing_id", listingId)
+				.order("check_in", { ascending: true });
+
+			if (error) throw error;
+			setListingBookings((data as IBooking[]) || []);
+		} catch (err: unknown) {
+			const message =
+				err instanceof Error ? err.message : "Unknown error";
+			setError(message);
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
 	return {
 		bookings,
+		listingBookings,
 		loading,
 		error,
 		totalCount,
 		fetchBookings,
+		fetchBookingsByListing,
 		addBooking,
 		updateBooking,
 		deleteBooking,

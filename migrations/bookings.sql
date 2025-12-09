@@ -11,7 +11,7 @@ create table if not exists public.bookings (
     check_out timestamptz,
 
     guests int,
-    status text check (status in ('pending', 'confirmed', 'cancelled', 'completed')),
+    status text check (status in ('pending', 'active', 'cancelled', 'completed')),
     
     total_price numeric,
     nights int,
