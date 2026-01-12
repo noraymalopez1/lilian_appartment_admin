@@ -8,6 +8,8 @@ create table if not exists public.listings (
     description text,
 
     price jsonb,                     -- { personType: price }
+    fees jsonb,                      -- { perPerson: number, perBooking: number }
+    whole_apartment_price numeric,   -- fixed price for whole apartment (optional)
 
     images text[],                   -- array of strings
 

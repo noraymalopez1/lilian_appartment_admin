@@ -53,6 +53,11 @@ const sideBarItems = [
     icon: <MessageSquareDiff size={24} />,
     to: "reviews",
   },
+  {
+    title: "Taxes",
+    icon: <ScrollText size={24} />,
+    to: "/taxes",
+  },
 ];
 
 const Sidebar = () => {

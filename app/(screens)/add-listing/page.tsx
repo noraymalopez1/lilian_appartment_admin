@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ChevronRight, Upload, X, Image as ImageIcon } from "lucide-react";
 import { useListings } from "@/hooks/useListings";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
 const listingSchema = z.object({
@@ -16,6 +16,9 @@ const listingSchema = z.object({
   description: z.string().min(20, "Description is required (min 20 chars)"),
   price_adult: z.number().min(0, "Adult price is required").optional(),
   price_child: z.number().min(0, "Child price is required").optional(),
+  fee_per_person: z.number().min(0).optional(),
+  fee_per_booking: z.number().min(0).optional(),
+  whole_apartment_price: z.number().min(0).optional(),
   images: z.array(z.string()).optional(),
   zipcode: z.string().min(3, "Zipcode is required"),
   city: z.string().min(2, "City is required"),
@@ -53,8 +56,13 @@ const allFeatures = [
 
 export default function AddListingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
-  const { addListing, loading } = useListings();
+  const { addListing, updateListing, loading } = useListings();
+
+  const listingId = searchParams.get("id");
+  const isEditMode = searchParams.get("edit") === "true";
+
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -62,17 +70,24 @@ export default function AddListingPage() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [adultPrice, setAdultPrice] = useState<string>("");
   const [childPrice, setChildPrice] = useState<string>("");
+  const [feePerPerson, setFeePerPerson] = useState<string>("");
+  const [feePerBooking, setFeePerBooking] = useState<string>("");
+  const [wholeApartmentPrice, setWholeApartmentPrice] = useState<string>("");
+  const [useWholeApartment, setUseWholeApartment] = useState(false);
   const [accessibilityPoints, setAccessibilityPoints] = useState<string[]>([""]);
   const [rules, setRules] = useState<string[]>([""]);
   const [submitting, setSubmitting] = useState(false);
+  const [loadingListing, setLoadingListing] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    reset,
+    setValue,
   } = useForm<ListingFormData>({
-    resolver: zodResolver(listingSchema),
+    resolver: isEditMode ? undefined : zodResolver(listingSchema),
     defaultValues: {
       category: undefined,
       is_parking_available: false,
@@ -83,11 +98,93 @@ export default function AddListingPage() {
 
   const category = watch("category");
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (category) {
       setSelectedCategory(category);
     }
   }, [category]);
+
+  const fetchListingData = useCallback(async () => {
+    if (!isEditMode || !listingId) return;
+
+    try {
+      setLoadingListing(true);
+      const { data, error } = await supabase
+        .from("listings")
+        .select("*")
+        .eq("uid", listingId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching listing:", error);
+        alert("Failed to load listing data");
+        return;
+      }
+
+      if (data) {
+        reset({
+          title: data.title,
+          category: data.category,
+          tags: data.tags,
+          description: data.description,
+          zipcode: data.zipcode,
+          city: data.city,
+          location: data.location,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          guest_capacity: data.guest_capacity,
+          bathrooms_count: data.bathrooms_count,
+          bedrooms_count: data.bedrooms_count,
+          living_area: data.living_area,
+          is_parking_available: data.is_parking_available,
+          distance: data.distance,
+          accessibility_points: data.accessibility_points,
+          rules: data.rules,
+          status: data.status,
+          features: data.features,
+        });
+
+        setSelectedCategory(data.category);
+
+        if (data.price) {
+          setAdultPrice(data.price.adult?.toString() || "");
+          setChildPrice(data.price.child?.toString() || "");
+        }
+
+        if (data.fees) {
+          setFeePerPerson(data.fees.perPerson?.toString() || "");
+          setFeePerBooking(data.fees.perBooking?.toString() || "");
+        }
+
+        if (data.whole_apartment_price) {
+          setWholeApartmentPrice(data.whole_apartment_price.toString());
+          setUseWholeApartment(true);
+        }
+
+        if (data.accessibility_points && data.accessibility_points.length > 0) {
+          setAccessibilityPoints(data.accessibility_points);
+        }
+
+        if (data.rules && data.rules.length > 0) {
+          setRules(data.rules);
+        }
+
+        if (data.images && data.images.length > 0) {
+          setUploadedImageUrls(data.images);
+          setImagePreviewUrls(data.images);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching listing:", error);
+      alert("Failed to load listing data");
+    } finally {
+      setLoadingListing(false);
+    }
+  }, [isEditMode, listingId, supabase, reset]);
+
+  useEffect(() => {
+    fetchListingData();
+  }, [fetchListingData]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -106,9 +203,20 @@ export default function AddListingPage() {
   };
 
   const removeImage = (index: number) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    // Remove from preview URLs
     setImagePreviewUrls((prev) => prev.filter((_, i) => i !== index));
+
+    // Remove from uploaded URLs (for existing images)
     setUploadedImageUrls((prev) => prev.filter((_, i) => i !== index));
+
+    // Only remove from selectedFiles if this is a newly selected file
+    // Check if we have more preview URLs than selected files (means we have existing images)
+    const existingImageCount = uploadedImageUrls.length;
+    if (index >= existingImageCount) {
+      // This is a newly selected file
+      const fileIndex = index - existingImageCount;
+      setSelectedFiles((prev) => prev.filter((_, i) => i !== fileIndex));
+    }
   };
 
   const uploadImagesToSupabase = async (): Promise<string[]> => {
@@ -150,13 +258,18 @@ export default function AddListingPage() {
   };
 
   const onSubmit = async (data: ListingFormData) => {
+    console.log("Form submitted!", data);
+    console.log("Form errors:", errors);
+    console.log("Is Edit Mode:", isEditMode);
+    console.log("Listing ID:", listingId);
     try {
       setSubmitting(true);
 
-      let imageUrls: string[] = uploadedImageUrls;
+      let imageUrls: string[] = [...uploadedImageUrls];
 
-      if (selectedFiles.length > 0 && uploadedImageUrls.length === 0) {
-        imageUrls = await uploadImagesToSupabase();
+      if (selectedFiles.length > 0) {
+        const newlyUploadedUrls = await uploadImagesToSupabase();
+        imageUrls = [...uploadedImageUrls, ...newlyUploadedUrls];
       }
 
       const priceObject = (adultPrice || childPrice) ? {
@@ -164,39 +277,63 @@ export default function AddListingPage() {
         child: parseFloat(childPrice) || 0,
       } : undefined;
 
-      const { price_adult, price_child, ...restData } = data;
+      const feesObject = (feePerPerson || feePerBooking) ? {
+        perPerson: parseFloat(feePerPerson) || 0,
+        perBooking: parseFloat(feePerBooking) || 0,
+      } : undefined;
+
+      const { price_adult, price_child, fee_per_person, fee_per_booking, whole_apartment_price, ...restData } = data;
       const formattedData = {
         ...restData,
         price: priceObject,
+        fees: feesObject,
+        whole_apartment_price: useWholeApartment && wholeApartmentPrice ? parseFloat(wholeApartmentPrice) : undefined,
         images: imageUrls.length > 0 ? imageUrls : undefined,
         accessibility_points: accessibilityPoints.filter((point) => point.trim() !== ""),
         rules: rules.filter((rule) => rule.trim() !== ""),
       };
 
-      await addListing(formattedData);
-      alert("Listing added successfully!");
+      if (isEditMode && listingId) {
+        await updateListing(listingId, formattedData);
+        alert("Listing updated successfully!");
+      } else {
+        await addListing(formattedData);
+        alert("Listing added successfully!");
+      }
+
       router.push("/dashboard");
     } catch (error) {
-      console.error("Error adding listing:", error);
-      alert("Failed to add listing. Please try again.");
+      console.error(`Error ${isEditMode ? 'updating' : 'adding'} listing:`, error);
+      alert(`Failed to ${isEditMode ? 'update' : 'add'} listing. Please try again.`);
     } finally {
       setSubmitting(false);
     }
   };
 
+  if (loadingListing) {
+    return (
+      <div className="w-full max-w-5xl mx-auto pt-12 px-4 pb-12 flex justify-center items-center h-64">
+        <p className="text-gray-600">Loading listing data...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-5xl mx-auto pt-12 px-4 pb-12">
       <div>
-        <h2 className="text-3xl font-bold">Add Listing</h2>
+        <h2 className="text-3xl font-bold">{isEditMode ? "Edit Listing" : "Add Listing"}</h2>
         <p className="flex items-center gap-2 text-gray-600">
           <a href="/dashboard" className="text-blue-600 hover:underline">
             Management
           </a>
-          <ChevronRight size={16} /> Add Listing
+          <ChevronRight size={16} /> {isEditMode ? "Edit Listing" : "Add Listing"}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
+      <form onSubmit={handleSubmit(onSubmit, (errors) => {
+        console.log("Form validation failed!", errors);
+        alert("Form has validation errors. Check console for details.");
+      })} className="mt-8 space-y-6">
         {/* Basic Information */}
         <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-10">
           <h2 className="text-2xl font-bold mb-6">Basic Information</h2>
@@ -398,6 +535,49 @@ export default function AddListingPage() {
           </div>
         </div>
 
+        {/* Fees Configuration */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-10">
+          <h2 className="text-2xl font-bold mb-6">Fees</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Configure additional fees for this listing
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="fee_per_person" className="block text-sm font-medium text-gray-700 mb-1">
+                Fee Per Person ($)
+              </label>
+              <input
+                type="number"
+                id="fee_per_person"
+                step="0.01"
+                min="0"
+                value={feePerPerson}
+                onChange={(e) => setFeePerPerson(e.target.value)}
+                placeholder="e.g. 10"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">Applied per guest</p>
+            </div>
+            <div>
+              <label htmlFor="fee_per_booking" className="block text-sm font-medium text-gray-700 mb-1">
+                Fee Per Booking ($)
+              </label>
+              <input
+                type="number"
+                id="fee_per_booking"
+                step="0.01"
+                min="0"
+                value={feePerBooking}
+                onChange={(e) => setFeePerBooking(e.target.value)}
+                placeholder="e.g. 50"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">Applied once per booking</p>
+            </div>
+          </div>
+        </div>
+
         {/* Images Upload */}
         <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-10">
           <h2 className="text-2xl font-bold mb-6">Images</h2>
@@ -439,7 +619,7 @@ export default function AddListingPage() {
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700 transition shadow-lg"
                     >
                       <X size={16} />
                     </button>
@@ -529,6 +709,126 @@ export default function AddListingPage() {
                   />
                   <span className="text-sm font-medium text-gray-700">Parking Available</span>
                 </label>
+              </div>
+
+              <div className="md:col-span-2 border-t border-gray-200 pt-4 mt-4">
+                <label className="flex items-center gap-2 cursor-pointer mb-3">
+                  <input
+                    type="checkbox"
+                    checked={useWholeApartment}
+                    onChange={(e) => setUseWholeApartment(e.target.checked)}
+                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Enable Whole Apartment Pricing
+                  </span>
+                </label>
+                {useWholeApartment && (
+                  <div>
+                    <label htmlFor="whole_apartment_price" className="block text-sm font-medium text-gray-700 mb-1">
+                      Whole Apartment Price ($) *
+                    </label>
+                    <input
+                      type="number"
+                      id="whole_apartment_price"
+                      step="0.01"
+                      min="0"
+                      value={wholeApartmentPrice}
+                      onChange={(e) => setWholeApartmentPrice(e.target.value)}
+                      placeholder="e.g. 500"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Fixed price for entire apartment regardless of number of guests
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-4 mt-6 border-t border-gray-200 pt-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Accessibility Points</label>
+                <p className="text-xs text-gray-500 mb-2">
+                  Add information about accessibility features (wheelchair access, elevators, etc.)
+                </p>
+                {accessibilityPoints.map((point, index) => (
+                  <div key={index} className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={point}
+                      onChange={(e) => {
+                        const newPoints = [...accessibilityPoints];
+                        newPoints[index] = e.target.value;
+                        setAccessibilityPoints(newPoints);
+                      }}
+                      placeholder="e.g. Wheelchair accessible entrance"
+                      className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    {index === accessibilityPoints.length - 1 ? (
+                      <button
+                        type="button"
+                        onClick={() => setAccessibilityPoints([...accessibilityPoints, ""])}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+                      >
+                        +
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newPoints = accessibilityPoints.filter((_, i) => i !== index);
+                          setAccessibilityPoints(newPoints);
+                        }}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold"
+                      >
+                        −
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Rules</label>
+                <p className="text-xs text-gray-500 mb-2">
+                  Add rules or restrictions (no smoking, no pets, check-in/out  times, etc.)
+                </p>
+                {rules.map((rule, index) => (
+                  <div key={index} className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={rule}
+                      onChange={(e) => {
+                        const newRules = [...rules];
+                        newRules[index] = e.target.value;
+                        setRules(newRules);
+                      }}
+                      placeholder="e.g. No smoking allowed"
+                      className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    {index === rules.length - 1 ? (
+                      <button
+                        type="button"
+                        onClick={() => setRules([...rules, ""])}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+                      >
+                        +
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newRules = rules.filter((_, i) => i !== index);
+                          setRules(newRules);
+                        }}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold"
+                      >
+                        −
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -666,21 +966,21 @@ export default function AddListingPage() {
           <button
             type="button"
             onClick={() => router.push("/dashboard")}
-            disabled={submitting || loading || uploadingImages}
+            disabled={submitting || uploadingImages || loadingListing}
             className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             type="submit"
-            disabled={submitting || loading || uploadingImages}
+            disabled={submitting || uploadingImages || loadingListing}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {uploadingImages
               ? "Uploading Images..."
-              : submitting || loading
-                ? "Adding Listing..."
-                : "Add Listing"}
+              : submitting
+                ? isEditMode ? "Updating Listing..." : "Adding Listing..."
+                : isEditMode ? "Update Listing" : "Add Listing"}
           </button>
         </div>
       </form>

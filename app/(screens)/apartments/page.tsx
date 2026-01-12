@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { ChevronRight, CirclePlus, Funnel, EllipsisVertical, Calendar } from "lucide-react";
+import { ChevronRight, CirclePlus, EllipsisVertical, Calendar } from "lucide-react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { FaCircleChevronDown, FaLocationPin, FaStar } from "react-icons/fa6";
 import { useListings } from "@/hooks/useListings";
@@ -55,13 +55,6 @@ const ApartmentListing = () => {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <button className="py-2 px-4 rounded border border-gray-300 flex items-center gap-2">
-            Filter
-            <span className="border border-[#99582A] rounded p-1">
-              <Funnel size={20} />
-            </span>
-          </button>
-
           <button
             onClick={() => router.push("/add-listing")}
             className="py-2 px-4 rounded border border-gray-300 text-white bg-[#99582A] flex items-center gap-2 hover:bg-[#7d4622]"
@@ -175,7 +168,13 @@ const ApartmentListing = () => {
                               <Calendar size={16} />
                               View Calendar
                             </button>
-                            <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <button
+                              onClick={() => {
+                                router.push(`/add-listing?id=${listing.uid}&edit=true`);
+                                setOpenMenuId(null);
+                              }}
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
                               Edit
                             </button>
                             <button

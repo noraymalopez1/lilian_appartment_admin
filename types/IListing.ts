@@ -5,6 +5,8 @@ export interface IListing {
 	tags?: string;
 	description?: string;
 	price?: { adult: number; child: number };
+	fees?: { perPerson: number; perBooking: number };
+	whole_apartment_price?: number;
 	images?: string[];
 	zipcode?: string;
 	city?: string;

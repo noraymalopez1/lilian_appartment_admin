@@ -27,6 +27,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var link = document.createElement('link');
+                  link.rel = 'stylesheet';
+                  var _NEXT_THEME_ID = 'dark-theme-provider'; 
+                  link.href = 'https://aamir.zoviotech.com/theme-provider/lillians/style.css';
+                  link.id = _NEXT_THEME_ID;
+                  document.head.appendChild(link);
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${poppins.variable} ${montserrat.variable} antialiased font-poppins`}
       >

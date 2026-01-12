@@ -281,6 +281,7 @@ const Booking = () => {
   });
 
   const isTaxiFilter = listingType === "taxi";
+  const isAllTypes = listingType === "all";
 
   useEffect(() => {
     if (isTaxiFilter) {
@@ -303,9 +304,21 @@ const Booking = () => {
       }
       fetchBookings(page, limit, bookingFilters, sortBy);
     }
-  }, [fetchBookings, fetchTaxiBookings, page, limit, statusFilter, sortBy, listingType, isTaxiFilter]);
 
-  const currentTotalCount = isTaxiFilter ? taxiTotalCount : totalCount;
+    if (isAllTypes) {
+      const taxiFilters: TaxiBookingsFilter = {};
+      if (statusFilter !== "all") {
+        taxiFilters.status = statusFilter as TaxiBookingsFilter["status"];
+      }
+      const taxiSort: TaxiBookingsSort = {
+        field: sortBy.field === "total_price" ? "price" : (sortBy.field as TaxiBookingsSort["field"]),
+        order: sortBy.order,
+      };
+      fetchTaxiBookings(page, limit, taxiFilters, taxiSort);
+    }
+  }, [fetchBookings, fetchTaxiBookings, page, limit, statusFilter, sortBy, listingType, isTaxiFilter, isAllTypes]);
+
+  const currentTotalCount = isAllTypes ? totalCount + taxiTotalCount : isTaxiFilter ? taxiTotalCount : totalCount;
   const totalPages = Math.ceil(currentTotalCount / limit);
   const isLoading = isTaxiFilter ? taxiLoading : loading;
   const currentError = isTaxiFilter ? taxiError : error;
@@ -446,6 +459,31 @@ const Booking = () => {
                   onDelete={handleTaxiDelete}
                 />
               ))
+            )
+          ) : isAllTypes ? (
+            bookings.length === 0 && taxiBookings.length === 0 ? (
+              <div className="text-center text-gray-500 py-10">
+                No bookings found.
+              </div>
+            ) : (
+              <>
+                {bookings.map((booking) => (
+                  <BookingCard
+                    key={booking.uid}
+                    data={booking}
+                    onStatusChange={handleBookingStatusChange}
+                    onDelete={handleBookingDelete}
+                  />
+                ))}
+                {taxiBookings.map((booking) => (
+                  <TaxiBookingCard
+                    key={booking.uid}
+                    data={booking}
+                    onStatusChange={handleTaxiStatusChange}
+                    onDelete={handleTaxiDelete}
+                  />
+                ))}
+              </>
             )
           ) : bookings.length === 0 ? (
             <div className="text-center text-gray-500 py-10">
