@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -54,7 +54,7 @@ const allFeatures = [
   "Balcony",
 ];
 
-export default function AddListingPage() {
+function AddListingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -985,5 +985,13 @@ export default function AddListingPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function AddListingPage() {
+  return (
+    <Suspense fallback={<div className="w-full h-screen flex items-center justify-center">Loading...</div>}>
+      <AddListingContent />
+    </Suspense>
   );
 }
