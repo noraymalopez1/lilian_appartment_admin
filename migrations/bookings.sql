@@ -1,6 +1,6 @@
 create table if not exists public.bookings (
     uid text primary key,
-    listing_id text references public.listings(uid),
+    listing_id text,
     listing_type text check (listing_type in ('apartment', 'attraction', 'taxi')),
     first_name text,
     last_name text,

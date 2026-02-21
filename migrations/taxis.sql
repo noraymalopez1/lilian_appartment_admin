@@ -8,4 +8,5 @@ create table if not exists public.taxis (
   status text not null, -- "active" or "closed"
   created_at timestamptz default now()
   price numeric not null,
+  image text default null,
 );

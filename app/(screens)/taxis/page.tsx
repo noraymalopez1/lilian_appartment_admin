@@ -39,8 +39,8 @@ const TaxiCard = ({ data, onEdit, onDelete, onToggleStatus }: TaxiCardProps) => 
     return (
       <span
         className={`px-3 py-1 text-xs font-semibold rounded-full ${isActive
-            ? "bg-green-100 text-green-600"
-            : "bg-red-100 text-red-600"
+          ? "bg-green-100 text-green-600"
+          : "bg-red-100 text-red-600"
           }`}
       >
         {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -53,9 +53,15 @@ const TaxiCard = ({ data, onEdit, onDelete, onToggleStatus }: TaxiCardProps) => 
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 flex items-center justify-center bg-[#FFF6ED] rounded-xl">
-            <Car className="w-7 h-7 text-[#99582A]" />
-          </div>
+          {data.image ? (
+            <div className="w-14 h-14 rounded-xl overflow-hidden">
+              <img src={data.image} alt={data.name} className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <div className="w-14 h-14 flex items-center justify-center bg-[#FFF0EE] rounded-xl">
+              <Car className="w-7 h-7 text-[#781F19]" />
+            </div>
+          )}
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{data.name}</h3>
             <p className="text-sm text-gray-500">{getCarTypeLabel(data.car_type)}</p>
@@ -68,7 +74,7 @@ const TaxiCard = ({ data, onEdit, onDelete, onToggleStatus }: TaxiCardProps) => 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
         <div className="bg-gray-50 p-3 rounded-lg">
           <p className="text-xs text-gray-500 uppercase">Price</p>
-          <p className="text-lg font-bold text-[#99582A]">${data.price}</p>
+          <p className="text-lg font-bold text-[#781F19]">€{data.price}</p>
         </div>
         <div className="bg-gray-50 p-3 rounded-lg">
           <p className="text-xs text-gray-500 uppercase">Passengers</p>
@@ -145,6 +151,7 @@ const TaxisPage = () => {
     addTaxi,
     updateTaxi,
     deleteTaxi,
+    uploadTaxiImage,
   } = useTaxis();
 
   const [page, setPage] = useState(1);
@@ -154,6 +161,8 @@ const TaxisPage = () => {
   const [editingTaxi, setEditingTaxi] = useState<ITaxi | null>(null);
   const [formData, setFormData] = useState<TaxiFormData>(initialFormData);
   const [submitting, setSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTaxis({
@@ -175,10 +184,13 @@ const TaxisPage = () => {
         carry_on_luggage: taxi.carry_on_luggage,
         status: taxi.status,
       });
+      setImagePreview(taxi.image || null);
     } else {
       setEditingTaxi(null);
       setFormData(initialFormData);
+      setImagePreview(null);
     }
+    setImageFile(null);
     setIsModalOpen(true);
   };
 
@@ -186,6 +198,8 @@ const TaxisPage = () => {
     setIsModalOpen(false);
     setEditingTaxi(null);
     setFormData(initialFormData);
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -193,10 +207,21 @@ const TaxisPage = () => {
     setSubmitting(true);
 
     try {
+      let imageUrl: string | undefined;
+
+      if (imageFile) {
+        imageUrl = await uploadTaxiImage(imageFile);
+      }
+
+      const taxiData = {
+        ...formData,
+        ...(imageUrl ? { image: imageUrl } : {}),
+      };
+
       if (editingTaxi) {
-        await updateTaxi(editingTaxi.uid, formData);
+        await updateTaxi(editingTaxi.uid, taxiData);
       } else {
-        await addTaxi(formData);
+        await addTaxi(taxiData);
       }
       handleCloseModal();
     } catch (err) {
@@ -269,7 +294,7 @@ const TaxisPage = () => {
           </Select>
 
           <Button
-            className="bg-[#99582A] text-white flex items-center gap-2"
+            className="bg-[#781F19] text-white flex items-center gap-2"
             onClick={() => handleOpenModal()}
           >
             Add Taxi <CirclePlus size={20} />
@@ -381,7 +406,7 @@ const TaxisPage = () => {
               </div>
 
               <div>
-                <Label htmlFor="price">Price ($)</Label>
+                <Label htmlFor="price">Price (€)</Label>
                 <Input
                   id="price"
                   type="number"
@@ -467,6 +492,32 @@ const TaxisPage = () => {
                 </Select>
               </div>
 
+              <div>
+                <Label htmlFor="taxi-image">Car Image</Label>
+                <Input
+                  id="taxi-image"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setImageFile(file);
+                      setImagePreview(URL.createObjectURL(file));
+                    }
+                  }}
+                  className="mt-1"
+                />
+                {imagePreview && (
+                  <div className="mt-2 relative w-full h-32 rounded-lg overflow-hidden">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-end gap-3 pt-4">
                 <Button
                   type="button"
@@ -477,7 +528,7 @@ const TaxisPage = () => {
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-[#99582A] text-white"
+                  className="bg-[#781F19] text-white"
                   disabled={submitting}
                 >
                   {submitting ? (

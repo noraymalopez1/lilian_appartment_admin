@@ -155,10 +155,10 @@ const Dashboard = () => {
           {
             label: "Bookings",
             data: chartData,
-            borderColor: "#9a4d13",
+            borderColor: "#601511",
             backgroundColor: "rgba(154, 77, 19, 0.15)",
             borderWidth: 3,
-            pointBackgroundColor: "#9a4d13",
+            pointBackgroundColor: "#601511",
             pointRadius: 5,
             tension: 0.4,
             fill: true,
@@ -332,8 +332,8 @@ const Dashboard = () => {
             key={index}
             className="flex items-center gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100"
           >
-            <div className="flex items-center justify-center bg-[#FFF6ED] p-3 rounded-lg">
-              <div className="text-[#99582A]">{stat.icon}</div>
+            <div className="flex items-center justify-center bg-[#FFF0EE] p-3 rounded-lg">
+              <div className="text-[#781F19]">{stat.icon}</div>
             </div>
             <div>
               <p className="text-sm text-gray-500">{stat.title}</p>
@@ -515,7 +515,7 @@ const Dashboard = () => {
                         {formatTableDate(booking.check_out)}
                       </TableCell>
                       <TableCell className="text-gray-800 font-medium">
-                        ${booking.total_price?.toFixed(2)}
+                        €{booking.total_price?.toFixed(2)}
                       </TableCell>
                       <TableCell>
                         <span

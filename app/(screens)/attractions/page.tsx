@@ -57,7 +57,7 @@ const AttractionsListing = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => router.push("/add-listing")}
-            className="py-2 px-4 rounded border border-gray-300 text-white bg-[#99582A] flex items-center gap-2 hover:bg-[#7d4622]"
+            className="py-2 px-4 rounded border border-gray-300 text-white bg-[#781F19] flex items-center gap-2 hover:bg-[#5f1914]"
           >
             Add Listing <CirclePlus size={20} />
           </button>
@@ -129,7 +129,7 @@ const AttractionsListing = () => {
                       <h2 className="text-xl font-bold text-gray-800">{listing.title}</h2>
                       <div className="flex items-center text-sm text-gray-600 mt-1">
                         <FaLocationPin />
-                        <span className="text-[#99582A] ml-1">
+                        <span className="text-[#781F19] ml-1">
                           {listing.city}
                           {listing.location && `, ${listing.location}`}
                         </span>
@@ -222,7 +222,7 @@ const AttractionsListing = () => {
                     )}
                     {firstPrice && (
                       <span className="text-xl font-bold text-gray-900 ml-auto">
-                        ${firstPrice}
+                        €{firstPrice}
                         {priceLabel && <span className="text-sm text-gray-600">/{priceLabel}</span>}
                       </span>
                     )}

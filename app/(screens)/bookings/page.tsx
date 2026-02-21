@@ -101,7 +101,7 @@ const BookingCard = ({ data, onStatusChange, onDelete }: BookingCardProps) => {
             <span className="font-medium">Phone:</span> {data.phone}
           </p>
           <p className="text-gray-600">
-            <span className="font-medium">Total Price:</span> $
+            <span className="font-medium">Total Price:</span> €
             {data.total_price}
           </p>
         </div>

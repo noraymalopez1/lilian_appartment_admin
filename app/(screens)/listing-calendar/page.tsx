@@ -24,7 +24,7 @@ import { format, parseISO, startOfDay, differenceInDays } from "date-fns";
 function LoadingFallback() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#99582A]" />
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#781F19]" />
     </div>
   );
 }
@@ -173,7 +173,7 @@ function ListingCalendarContent() {
           <p className="text-gray-600 mt-2">Missing listing ID or type</p>
           <button
             onClick={() => router.back()}
-            className="mt-4 px-4 py-2 bg-[#99582A] text-white rounded-lg hover:bg-[#7d4622]"
+            className="mt-4 px-4 py-2 bg-[#781F19] text-white rounded-lg hover:bg-[#5f1914]"
           >
             Go Back
           </button>
@@ -204,7 +204,7 @@ function ListingCalendarContent() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <CalendarIcon className="w-5 h-5 text-[#99582A]" />
+              <CalendarIcon className="w-5 h-5 text-[#781F19]" />
               <span className="text-sm text-gray-600 hidden sm:inline">
                 {format(new Date(), "MMMM yyyy")}
               </span>
@@ -215,7 +215,7 @@ function ListingCalendarContent() {
 
       {loading && !listing ? (
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#99582A]" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#781F19]" />
         </div>
       ) : (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -223,7 +223,7 @@ function ListingCalendarContent() {
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
                 <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <CalendarIcon className="w-5 h-5 text-[#99582A]" />
+                  <CalendarIcon className="w-5 h-5 text-[#781F19]" />
                   Availability Calendar
                 </h2>
 
@@ -274,12 +274,12 @@ function ListingCalendarContent() {
                   <div className="flex flex-wrap gap-2 mb-4">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${selectedDateStatus === "blocked"
-                          ? "bg-orange-100 text-orange-800"
-                          : selectedDateStatus === "fully-booked" || selectedDateStatus === "booked"
-                            ? "bg-red-100 text-red-800"
-                            : selectedDateStatus === "partially-booked"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-green-100 text-green-800"
+                        ? "bg-orange-100 text-orange-800"
+                        : selectedDateStatus === "fully-booked" || selectedDateStatus === "booked"
+                          ? "bg-red-100 text-red-800"
+                          : selectedDateStatus === "partially-booked"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-green-100 text-green-800"
                         }`}
                     >
                       {selectedDateStatus === "blocked"
@@ -324,14 +324,14 @@ function ListingCalendarContent() {
                               </div>
                               <div className="text-right">
                                 <span className="text-lg font-bold text-gray-800">
-                                  ${booking.total_price}
+                                  €{booking.total_price}
                                 </span>
                                 <span
                                   className={`block text-xs px-2 py-1 rounded mt-1 ${booking.status === "active"
-                                      ? "bg-green-100 text-green-800"
-                                      : booking.status === "pending"
-                                        ? "bg-yellow-100 text-yellow-800"
-                                        : "bg-gray-100 text-gray-800"
+                                    ? "bg-green-100 text-green-800"
+                                    : booking.status === "pending"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-gray-100 text-gray-800"
                                     }`}
                                 >
                                   {booking.status}
@@ -361,7 +361,7 @@ function ListingCalendarContent() {
                           placeholder="Reason for blocking (optional)"
                           value={blockReason}
                           onChange={(e) => setBlockReason(e.target.value)}
-                          className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#99582A]"
+                          className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#781F19]"
                         />
                         <button
                           onClick={handleBlockDate}
@@ -478,16 +478,16 @@ function BookingCard({ booking }: { booking: IBooking }) {
           </p>
           <span
             className={`inline-block text-xs px-2 py-0.5 rounded mt-1 ${booking.status === "active"
-                ? "bg-green-100 text-green-800"
-                : booking.status === "pending"
-                  ? "bg-yellow-100 text-yellow-800"
-                  : "bg-gray-100 text-gray-800"
+              ? "bg-green-100 text-green-800"
+              : booking.status === "pending"
+                ? "bg-yellow-100 text-yellow-800"
+                : "bg-gray-100 text-gray-800"
               }`}
           >
             {booking.status}
           </span>
         </div>
-        <p className="text-lg font-bold text-[#99582A]">${booking.total_price}</p>
+        <p className="text-lg font-bold text-[#781F19]">€{booking.total_price}</p>
       </div>
 
       <div className="text-sm text-gray-600 space-y-1">

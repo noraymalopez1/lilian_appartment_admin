@@ -72,7 +72,7 @@ export const useTaxis = () => {
 
 				const totalCount = count || 0;
 				const calculatedTotalPages = Math.ceil(
-					totalCount / customPageSize
+					totalCount / customPageSize,
 				);
 
 				setTaxis(data as ITaxi[]);
@@ -87,7 +87,7 @@ export const useTaxis = () => {
 				setLoading(false);
 			}
 		},
-		[supabase, pageSize, setTaxis, setLoading, setError, setPagination]
+		[supabase, pageSize, setTaxis, setLoading, setError, setPagination],
 	);
 
 	const addTaxi = useCallback(
@@ -124,7 +124,7 @@ export const useTaxis = () => {
 				setLoading(false);
 			}
 		},
-		[supabase, setLoading, setError, addTaxiToStore]
+		[supabase, setLoading, setError, addTaxiToStore],
 	);
 
 	const updateTaxi = useCallback(
@@ -158,7 +158,7 @@ export const useTaxis = () => {
 				setLoading(false);
 			}
 		},
-		[supabase, setLoading, setError, updateTaxiInStore]
+		[supabase, setLoading, setError, updateTaxiInStore],
 	);
 
 	const deleteTaxi = useCallback(
@@ -189,7 +189,32 @@ export const useTaxis = () => {
 				setLoading(false);
 			}
 		},
-		[supabase, setLoading, setError, deleteTaxiFromStore]
+		[supabase, setLoading, setError, deleteTaxiFromStore],
+	);
+
+	const uploadTaxiImage = useCallback(
+		async (file: File): Promise<string> => {
+			const fileExt = file.name.split(".").pop();
+			const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+			const filePath = `taxis/${fileName}`;
+
+			const { error: uploadError } = await supabase.storage
+				.from("lillians")
+				.upload(filePath, file);
+
+			if (uploadError) {
+				throw new Error(
+					`Failed to upload image: ${uploadError.message}`,
+				);
+			}
+
+			const { data: urlData } = supabase.storage
+				.from("lillians")
+				.getPublicUrl(filePath);
+
+			return urlData.publicUrl;
+		},
+		[supabase],
 	);
 
 	return {
@@ -204,5 +229,6 @@ export const useTaxis = () => {
 		addTaxi,
 		updateTaxi,
 		deleteTaxi,
+		uploadTaxiImage,
 	};
 };

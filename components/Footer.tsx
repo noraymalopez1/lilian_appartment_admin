@@ -41,7 +41,7 @@ const Footer = () => {
             eiusmod tempor incididunt ut laboreet dolore magna aliqua. Ut enim
             ad minim
           </p>
-          <div className="mt-8 flex items-center gap-8 *:text-[#99582A]">
+          <div className="mt-8 flex items-center gap-8 *:text-[#781F19]">
             {[
               {
                 icon: <FaInstagram size={20} />,
@@ -98,7 +98,7 @@ const Footer = () => {
         <p className="text-[14px]">
           Copyright © {new Date().getFullYear()} lilians Design Apartments
         </p>
-        <div className="flex items-center gap-4 *:text-[14px] *:text-[#99582A]">
+        <div className="flex items-center gap-4 *:text-[14px] *:text-[#781F19]">
           <a href="#">Privacy Policy</a>
           <a href="#">Terms & Conditions</a>
           <a href="#">Cookie Policy</a>

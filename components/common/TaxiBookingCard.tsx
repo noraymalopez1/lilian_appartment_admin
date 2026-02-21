@@ -72,8 +72,8 @@ const TaxiBookingCard = ({
       {/* Header with name and status */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
-          <div className="w-12 h-12 flex-shrink-0 rounded-full bg-[#FFF6ED] flex items-center justify-center mr-3">
-            <Car className="w-6 h-6 text-[#99582A]" />
+          <div className="w-12 h-12 flex-shrink-0 rounded-full bg-[#FFF0EE] flex items-center justify-center mr-3">
+            <Car className="w-6 h-6 text-[#781F19]" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -86,7 +86,7 @@ const TaxiBookingCard = ({
           </div>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-bold text-[#99582A]">${data.price}</p>
+          <p className="text-2xl font-bold text-[#781F19]">€{data.price}</p>
           <p className="text-xs text-gray-500">Taxi Booking</p>
         </div>
       </div>

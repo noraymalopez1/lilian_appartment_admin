@@ -41,7 +41,7 @@ export default function TaxesPage() {
       <div className="flex justify-end mb-6">
         <Button
           onClick={() => setShowAddModal(true)}
-          className="bg-[#99582A] hover:bg-[#7d461f] text-white flex items-center gap-2"
+          className="bg-[#781F19] hover:bg-[#5f1914] text-white flex items-center gap-2"
         >
           <Plus size={20} />
           Add New Tax
@@ -50,7 +50,7 @@ export default function TaxesPage() {
 
       {isLoading && taxes.length === 0 ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-[#99582A]" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#781F19]" />
           <span className="ml-2">Loading taxes...</span>
         </div>
       ) : taxes.length === 0 ? (
@@ -75,7 +75,7 @@ export default function TaxesPage() {
                 <tr key={tax.uid} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm text-gray-900">{tax.name}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {tax.type === "percentage" ? `${tax.rate}%` : `$${tax.rate}`}
+                    {tax.type === "percentage" ? `${tax.rate}%` : `€${tax.rate}`}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900 capitalize">{tax.type}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">
@@ -195,7 +195,7 @@ function TaxModal({ tax, onClose, onSave }: TaxModalProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Rate * {formData.type === "percentage" ? "(%)" : "($)"}
+              Rate * {formData.type === "percentage" ? "(%)" : "(€)"}
             </label>
             <input
               type="number"
@@ -247,7 +247,7 @@ function TaxModal({ tax, onClose, onSave }: TaxModalProps) {
             <button
               type="submit"
               disabled={submitting}
-              className="px-6 py-3 bg-[#99582A] text-white rounded-lg hover:bg-[#7d461f] transition disabled:opacity-50"
+              className="px-6 py-3 bg-[#781F19] text-white rounded-lg hover:bg-[#5f1914] transition disabled:opacity-50"
             >
               {submitting ? "Saving..." : tax ? "Update Tax" : "Add Tax"}
             </button>

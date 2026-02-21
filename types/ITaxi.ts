@@ -8,4 +8,5 @@ export interface ITaxi {
 	status: "active" | "closed";
 	created_at: string;
 	price: number;
+	image?: string;
 }

@@ -103,7 +103,7 @@ const Reviews = () => {
               onClick={() => setShowFilterMenu(!showFilterMenu)}
             >
               Filter
-              <span className="border border-[#99582A] rounded p-1">
+              <span className="border border-[#781F19] rounded p-1">
                 <Funnel size={20} />
               </span>
             </button>

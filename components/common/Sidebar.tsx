@@ -97,7 +97,7 @@ const Sidebar = () => {
               href={"dashboard"}
               className={cn(
                 path.includes("/dashboard") || path.startsWith("/dashboard")
-                  ? "text-[#F0EAE9] bg-[#99582A]"
+                  ? "text-[#F0EAE9] bg-[#781F19]"
                   : "",
                 "rounded-2xl px-3 py-2 gap-2 mt-2 w-fit text-center justify-between flex items-center"
               )}
@@ -120,7 +120,7 @@ const Sidebar = () => {
                     href={item.to}
                     className={cn(
                       path.includes(item.to) || path.startsWith(item.to)
-                        ? "text-[#F0EAE9] bg-[#99582A]"
+                        ? "text-[#F0EAE9] bg-[#781F19]"
                         : "",
                       "py-2 px-3 rounded-2xl w-fit text-center flex items-center gap-2"
                     )}
