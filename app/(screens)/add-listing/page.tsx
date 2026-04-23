@@ -287,7 +287,7 @@ function AddListingContent() {
         ...restData,
         price: priceObject,
         fees: feesObject,
-        whole_apartment_price: useWholeApartment && wholeApartmentPrice ? parseFloat(wholeApartmentPrice) : undefined,
+        whole_apartment_price: useWholeApartment && wholeApartmentPrice ? parseFloat(wholeApartmentPrice) : null,
         images: imageUrls.length > 0 ? imageUrls : undefined,
         accessibility_points: accessibilityPoints.filter((point) => point.trim() !== ""),
         rules: rules.filter((rule) => rule.trim() !== ""),
